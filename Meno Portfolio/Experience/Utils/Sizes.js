@@ -1,13 +1,6 @@
-import { EventEmitter } from "eventemitter3";
+import { EventEmitter } from "events";
 
 export default class Sizes extends EventEmitter {
-    width: number;
-    height: number;
-    aspect: number;
-    pixelRatio: number;
-    frustrum: number;
-    device: "mobile" | "desktop";
-
     constructor() {
         super();
         this.width = window.innerWidth;

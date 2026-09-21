@@ -1,26 +1,12 @@
 import * as THREE from "three";
-import { EventEmitter } from "eventemitter3";
+
+import { EventEmitter } from "events";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import Experience from "../Experience.js";
-import Renderer from "../Renderer.js";
-import { Asset } from "./assets.js";
 
 export default class Resources extends EventEmitter {
-    experience: Experience;
-    renderer: Renderer;
-    assets: Asset[];
-    items: { [key: string]: any };
-    queue: number;
-    loaded: number;
-    loaders!: {
-        gltfLoader: GLTFLoader;
-        dracoLoader: DRACOLoader;
-    };
-    video: { [key: string]: HTMLVideoElement } = {};
-    videoTexture: { [key: string]: THREE.VideoTexture } = {};
-
-    constructor(assets: Asset[]) {
+    constructor(assets) {
         super();
         this.experience = new Experience();
         this.renderer = this.experience.renderer;
@@ -36,14 +22,12 @@ export default class Resources extends EventEmitter {
     }
 
     setLoaders() {
-        this.loaders = {
-            gltfLoader: new GLTFLoader(),
-            dracoLoader: new DRACOLoader(),
-        };
+        this.loaders = {};
+        this.loaders.gltfLoader = new GLTFLoader();
+        this.loaders.dracoLoader = new DRACOLoader();
         this.loaders.dracoLoader.setDecoderPath("/draco/");
         this.loaders.gltfLoader.setDRACOLoader(this.loaders.dracoLoader);
     }
-
     startLoading() {
         for (const asset of this.assets) {
             if (asset.type === "glbModel") {
@@ -51,6 +35,9 @@ export default class Resources extends EventEmitter {
                     this.singleAssetLoaded(asset, file);
                 });
             } else if (asset.type === "videoTexture") {
+                this.video = {};
+                this.videoTexture = {};
+
                 this.video[asset.name] = document.createElement("video");
                 this.video[asset.name].src = asset.path;
                 this.video[asset.name].muted = true;
@@ -62,17 +49,18 @@ export default class Resources extends EventEmitter {
                 this.videoTexture[asset.name] = new THREE.VideoTexture(
                     this.video[asset.name]
                 );
+                // this.videoTexture[asset.name].flipY = false;
                 this.videoTexture[asset.name].minFilter = THREE.NearestFilter;
                 this.videoTexture[asset.name].magFilter = THREE.NearestFilter;
                 this.videoTexture[asset.name].generateMipmaps = false;
-                this.videoTexture[asset.name].colorSpace = THREE.SRGBColorSpace;
+                this.videoTexture[asset.name].encoding = THREE.sRGBEncoding;
 
                 this.singleAssetLoaded(asset, this.videoTexture[asset.name]);
             }
         }
     }
 
-    singleAssetLoaded(asset: Asset, file: any) {
+    singleAssetLoaded(asset, file) {
         this.items[asset.name] = file;
         this.loaded++;
 

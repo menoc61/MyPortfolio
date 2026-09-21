@@ -14,25 +14,13 @@ import World from "./World/World.js";
 import Controls from "./World/Controls.js";
 
 export default class Experience {
-    static instance: Experience;
-    canvas: HTMLCanvasElement;
-    scene: THREE.Scene;
-    time: Time;
-    sizes: Sizes;
-    camera: Camera;
-    renderer: Renderer;
-    resources: Resources;
-    theme: Theme;
-    world: World;
-    preloader: Preloader;
-    controls?: Controls;
-
-    constructor(canvas?: HTMLCanvasElement) {
+    static instance;
+    constructor(canvas) {
         if (Experience.instance) {
             return Experience.instance;
         }
         Experience.instance = this;
-        this.canvas = canvas!;
+        this.canvas = canvas;
         this.scene = new THREE.Scene();
         this.time = new Time();
         this.sizes = new Sizes();

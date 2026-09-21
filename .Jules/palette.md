@@ -1,3 +1,0 @@
-## 2025-05-21 - Theme Toggle Accessibility in 3D WebGL Portfolios
-**Learning:** In 3D WebGL portfolios with fixed overlays (like theme toggles and canvas overlays), screen readers and keyboard users need explicit focus indicators, skip-to-content links, and dynamic ARIA attributes on icon/toggle controls. CSS backdrop filters improve contrast for fixed floating controls over 3D canvases across both light and dark themes.
-**Action:** Always include `.skip-link`, explicit `:focus-visible` ring styles, dynamic `aria-pressed` / `aria-label` updates, and glassmorphism styling on floating UI controls for 3D web applications.
