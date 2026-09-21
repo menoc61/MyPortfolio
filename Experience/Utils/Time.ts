@@ -1,6 +1,11 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "eventemitter3";
 
 export default class Time extends EventEmitter {
+    start: number;
+    current: number;
+    elapsed: number;
+    delta: number;
+
     constructor() {
         super();
         this.start = Date.now();
