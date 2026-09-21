@@ -1,4 +1,10 @@
-export default [
+export interface Asset {
+    name: string;
+    type: "glbModel" | "videoTexture";
+    path: string;
+}
+
+const assets: Asset[] = [
     {
         name: "room",
         type: "glbModel",
@@ -10,3 +16,5 @@ export default [
         path: "/textures/kda.mp4",
     },
 ];
+
+export default assets;

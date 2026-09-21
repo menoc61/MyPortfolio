@@ -1,9 +1,23 @@
 import * as THREE from "three";
 import Experience from "../Experience.js";
-import GSAP from "gsap";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
+import Resources from "../Utils/Resources.js";
+import Time from "../Utils/Time.js";
+import gsap from "gsap";
 
 export default class Room {
+    experience: Experience;
+    scene: THREE.Scene;
+    resources: Resources;
+    time: Time;
+    room: any;
+    actualRoom: THREE.Object3D;
+    roomChildren: { [key: string]: THREE.Object3D };
+    lerp: { current: number; target: number; ease: number };
+    rectLight!: THREE.RectAreaLight;
+    mixer!: THREE.AnimationMixer;
+    swim!: THREE.AnimationAction;
+    rotation: number = 0;
+
     constructor() {
         this.experience = new Experience();
         this.scene = this.experience.scene;
@@ -25,27 +39,26 @@ export default class Room {
     }
 
     setModel() {
-        this.actualRoom.children.forEach((child) => {
+        this.actualRoom.children.forEach((child: any) => {
             child.castShadow = true;
             child.receiveShadow = true;
 
             if (child instanceof THREE.Group) {
-                child.children.forEach((groupchild) => {
+                child.children.forEach((groupchild: any) => {
                     groupchild.castShadow = true;
                     groupchild.receiveShadow = true;
                 });
             }
 
-            // console.log(child);
-
             if (child.name === "Aquarium") {
-                // console.log(child);
-                child.children[0].material = new THREE.MeshPhysicalMaterial();
-                child.children[0].material.roughness = 0;
-                child.children[0].material.color.set(0x549dd2);
-                child.children[0].material.ior = 3;
-                child.children[0].material.transmission = 1;
-                child.children[0].material.opacity = 1;
+                child.children[0].material = new THREE.MeshPhysicalMaterial({
+                    roughness: 0,
+                    color: 0x549dd2,
+                    ior: 3,
+                    transmission: 1,
+                    opacity: 1,
+                    transparent: true,
+                });
             }
 
             if (child.name === "Computer") {
@@ -59,24 +72,17 @@ export default class Room {
                 child.position.z = 8.83572;
             }
 
-            // if (
-            //     child.name === "Mailbox" ||
-            //     child.name === "Lamp" ||
-            //     child.name === "FloorFirst" ||
-            //     child.name === "FloorSecond" ||
-            //     child.name === "FloorThird" ||
-            //     child.name === "Dirt" ||
-            //     child.name === "Flower1" ||
-            //     child.name === "Flower2"
-            // ) {
-            //     child.scale.set(0, 0, 0);
-            // }
-
-            child.scale.set(0, 0, 0);
-            if (child.name === "Cube") {
-                // child.scale.set(1, 1, 1);
-                child.position.set(0, -1, 0);
-                child.rotation.y = Math.PI / 4;
+            if (
+                child.name === "Mailbox" ||
+                child.name === "Lamp" ||
+                child.name === "FloorFirst" ||
+                child.name === "FloorSecond" ||
+                child.name === "FloorThird" ||
+                child.name === "Dirt" ||
+                child.name === "Flower1" ||
+                child.name === "Flower2"
+            ) {
+                child.scale.set(0, 0, 0);
             }
 
             this.roomChildren[child.name.toLowerCase()] = child;
@@ -85,22 +91,18 @@ export default class Room {
         const width = 0.5;
         const height = 0.7;
         const intensity = 1;
-        const rectLight = new THREE.RectAreaLight(
+        this.rectLight = new THREE.RectAreaLight(
             0xffffff,
             intensity,
             width,
             height
         );
-        rectLight.position.set(7.68244, 7, 0.5);
-        rectLight.rotation.x = -Math.PI / 2;
-        rectLight.rotation.z = Math.PI / 4;
-        this.actualRoom.add(rectLight);
+        this.rectLight.position.set(7.68244, 7, 0.5);
+        this.rectLight.rotation.x = -Math.PI / 2;
+        this.rectLight.rotation.z = Math.PI / 4;
+        this.actualRoom.add(this.rectLight);
 
-        this.roomChildren["rectLight"] = rectLight;
-
-        // const rectLightHelper = new RectAreaLightHelper(rectLight);
-        // rectLight.add(rectLightHelper);
-        // console.log(this.room);
+        this.roomChildren["rectLight"] = this.rectLight as any;
 
         this.scene.add(this.actualRoom);
         this.actualRoom.scale.set(0.11, 0.11, 0.11);
@@ -108,22 +110,24 @@ export default class Room {
 
     setAnimation() {
         this.mixer = new THREE.AnimationMixer(this.actualRoom);
-        this.swim = this.mixer.clipAction(this.room.animations[0]);
-        this.swim.play();
+        if (this.room.animations && this.room.animations[0]) {
+            this.swim = this.mixer.clipAction(this.room.animations[0]);
+            this.swim.play();
+        }
     }
 
     onMouseMove() {
         window.addEventListener("mousemove", (e) => {
             this.rotation =
                 ((e.clientX - window.innerWidth / 2) * 2) / window.innerWidth;
-            this.lerp.target = this.rotation * 0.05;
+            this.lerp.target = this.rotation * 0.1;
         });
     }
 
     resize() {}
 
     update() {
-        this.lerp.current = GSAP.utils.interpolate(
+        this.lerp.current = gsap.utils.interpolate(
             this.lerp.current,
             this.lerp.target,
             this.lerp.ease
@@ -131,6 +135,8 @@ export default class Room {
 
         this.actualRoom.rotation.y = this.lerp.current;
 
-        this.mixer.update(this.time.delta * 0.0009);
+        if (this.mixer) {
+            this.mixer.update(this.time.delta * 0.001);
+        }
     }
 }

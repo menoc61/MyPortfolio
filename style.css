@@ -8,31 +8,64 @@
 
 html, body{
   font-family: "Montserrat", sans-serif;
+  scroll-behavior: smooth;
 }
 
-/* body{
-  overflow: hidden;
-} */
+/* Accessibility: Skip link */
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 16px;
+  background: var(--color-pink);
+  color: #ffffff;
+  padding: 12px 20px;
+  z-index: 1000000000000;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 16px;
+  outline: 3px solid var(--color-blue);
+}
+
+/* Focus Visible outline for keyboard navigation */
+:focus-visible {
+  outline: 3px solid var(--color-blue);
+  outline-offset: 4px;
+}
 
 h1,
 section,
 p,
 span,
-svg{
+svg,
+a{
   transition: background-color 0.5s, color 0.5s;
+}
+
+a {
+  color: var(--color-pink);
+  text-decoration: underline;
+}
+
+a:hover, a:focus-visible {
+  opacity: 0.8;
 }
 
 :root{
   /* Light Theme Variables */
   --color-text-light: #333332;
   --color-background-light: #FAF4E5;
-  --color-pink-light: #e5a1aa;
-  --color-green-light: #7AD0AC;
-  --color-blue-light: #8395CD;
+  --color-pink-light: #d66173;
+  --color-green-light: #1b8a5d;
+  --color-blue-light: #4c63a6;
 
   /* Dark Theme Variables */
   --color-text-dark: #FAF4E5;
-  --color-background-dark: #8395CD;
+  --color-background-dark: #222b45;
 }
 
 .light-theme{
@@ -93,8 +126,8 @@ svg{
 }
 
 .circle{
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   margin: 6px;
   background-color: var(--color-pink-light);
@@ -121,12 +154,11 @@ svg{
   40% {
     transform: translateY(0)
   }
-  
 }
 
 /* Page Itself --------------------------------------------- */
 .page{
-  z-index:99999;
+  z-index: 99999;
   width: 100%;
   height: 100vh;
   overflow: hidden;
@@ -149,8 +181,8 @@ svg{
   position: absolute;
   top: 50%;
   left: 50%;
-  font-weight: 500;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 18px;
   color: var(--color-text);
   transform: translate(-50%, -50%);
 }
@@ -162,7 +194,7 @@ svg{
   opacity: 0;
   color: var(--color-text);
   transform: translate(-50%, -50%);
-  animation: bounce 0.5s ease-in alternate infinite;
+  animation: bounce 0.6s ease-in alternate infinite;
 }
 
 @keyframes bounce {
@@ -171,7 +203,7 @@ svg{
   }
 
   100%{
-    transform: translateY(8px)
+    transform: translateY(10px)
   }
 }
 
@@ -183,9 +215,18 @@ svg{
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  top: 48px;
-  right: 48px;
+  top: 32px;
+  right: 32px;
   z-index: 99999999999999;
+  background-color: rgba(250, 244, 229, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme .toggle-bar {
+  background-color: rgba(34, 43, 69, 0.85);
 }
 
 .sun-wrapper, 
@@ -207,7 +248,7 @@ svg{
   align-items: center;
   background-color: var(--color-pink);
   border-radius: 999px;
-  margin: 0px 16px;
+  margin: 0px 12px;
   border: none;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
@@ -227,7 +268,7 @@ svg{
 }
 
 .slide{
-  left: 31px;
+  left: 30px;
 }
 
 /* Section Formatting --------------------------------------------- */
@@ -299,34 +340,57 @@ svg{
 
 .section-detail-wrapper{
   position: relative;
-  padding: 20% 5%;
+  padding: 10% 5%;
 }
 
 .section-heading{
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  line-height: 1.8;
-  margin-top: 64px;
+  line-height: 1.6;
+  margin-top: 48px;
   color: var(--color-text);
 }
 
 .section-text{
-  line-height: 2;
-  margin-top: 18px;
+  line-height: 1.8;
+  margin-top: 16px;
   font-size: 16px;
   color: var(--color-text);
+}
+
+.achievements-list {
+  margin-top: 16px;
+  padding-left: 20px;
+  line-height: 2;
+  color: var(--color-text);
+}
+
+.project-item {
+  margin-top: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+}
+
+.dark-theme .project-item {
+  border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+.project-link {
+  display: inline-block;
+  font-weight: 600;
+  margin-top: 8px;
 }
 
 /* Fancy Decoration Part of Section */
 .section-title{
   position: relative;
-  color: var(--color-pink)
+  color: var(--color-pink);
 }
 
 .section-title-text{
   display: block;
   font-size: 40px;
-  font-weight: 500;
+  font-weight: 600;
   transform-origin: left;
   transform: skewY(25deg);
   z-index: 5;
@@ -367,6 +431,7 @@ svg{
   right: 0;
   color: var(--color-pink);
   font-size: 24px;
+  font-weight: 700;
 }
 
 
@@ -401,16 +466,21 @@ svg{
 
 .hero-main-title{
   font-size: 64px;
+  font-weight: 800;
   color: var(--color-text);
+  line-height: 1.1;
 }
 
 .hero-main-description{
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 8px;
   color: var(--color-text);
 }
 
 .hero-second-subheading{
   font-size: 32px;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--color-text);
 }
@@ -419,7 +489,7 @@ svg{
 /* Other colors override */
 
 .blue-text{
-  color: var(--color-blue)
+  color: var(--color-blue);
 }
 
 .blue-border{
@@ -431,7 +501,7 @@ svg{
 }
 
 .green-text{
-  color: var(--color-green)
+  color: var(--color-green);
 }
 
 .green-border{
@@ -446,30 +516,49 @@ svg{
 /* Media Queries */
 
 @media (max-width: 968px){
+  .toggle-bar {
+    top: 16px;
+    right: 16px;
+    padding: 6px 12px;
+  }
+
   .section{
     width: 100%;
+    padding: 600px 6%;
   }
+
   .progress-bar-wrapper-left{
     right: 0;
     left: auto;
   }
+
   .hero-main{
     bottom: 120px;
+    padding: 0 16px;
   }
+
   .hero-second{
-    top: 160px;
+    top: 140px;
+    padding: 0 16px;
   }
+
   .hero-wrapper{
-    width: calc(100% - 60px);
+    width: 100%;
   }
+
   .hero-main-title{
-    font-size: 32px;
+    font-size: 36px;
   }
+
   .hero-main-description{
-    font-size: 18px;
+    font-size: 16px;
   }
+
   .hero-second-subheading{
-    font-size: 18px;
+    font-size: 20px;
+  }
+
+  .section-title-text {
+    font-size: 28px;
   }
 }
-

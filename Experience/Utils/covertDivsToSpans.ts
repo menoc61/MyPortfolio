@@ -1,6 +1,6 @@
-export default function (element) {
+export default function convertDivsToSpans(element: HTMLElement): HTMLElement {
     element.style.overflow = "hidden";
-    element.innerHTML = element.innerText
+    element.innerHTML = (element.innerText || "")
         .split("")
         .map((char) => {
             if (char === " ") {
