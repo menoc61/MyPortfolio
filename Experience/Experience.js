@@ -80,14 +80,18 @@ export default class Experience {
             return;
         }
 
-        // The GLB is Draco-compressed, so GLTFLoader needs the decoder. Three's
-        // own default resolves it relative to import.meta.url — Rollup rewrites
+        // The GLB is Draco-compressed (data header v2.2, encoded by Blender's
+        // glTF exporter), so GLTFLoader needs a decoder new enough for it. Three
+        // resolves its own decoder relative to import.meta.url — Rollup rewrites
         // that for the production build, but Vite's dev server serves the
         // dep-optimized module from /node_modules/.vite/deps/ and the relative
         // decoder URL 404s, so the model (and with it the intro) never loads in
-        // dev. The decoder is therefore self-hosted in public/draco and wired
-        // explicitly — the first-commit arrangement. base is "/", so the
-        // absolute path holds in dev and in production alike.
+        // dev. The decoder is therefore self-hosted in public/draco — VERBATIM
+        // copies of three's own bundled files, so the version always matches
+        // both the DRACOLoader protocol and the GLB data. (The first commit's
+        // decoder files predate draco v2.2 and fail with "Unexpected geometry
+        // type" — refresh these copies whenever three is upgraded.) base is
+        // "/", so the absolute path holds in dev and in production alike.
         this.resources = new Resources(assets, { dracoPath: "/draco/" });
         this.resources.on(EVENTS.RESOURCES_PROGRESS, (name, stats) => {
             this.scenePreloader?.onResourceProgress(name, stats);

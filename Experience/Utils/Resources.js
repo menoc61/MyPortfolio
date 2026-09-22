@@ -19,8 +19,9 @@ import { EVENTS } from "./EVENTS.js";
  *    `import.meta.url`: Rollup rewrites that for the production build, but
  *    Vite's dev server cannot serve it (the dep-optimized module lives under
  *    /node_modules/.vite/deps/), so dev 404s and the critical model never
- *    loads. The explicit path is the first-commit arrangement and works in
- *    both dev and build.
+ *    loads. The files in public/draco are VERBATIM copies of three's bundled
+ *    decoder (version-matched to the DRACOLoader protocol and to the GLB's
+ *    draco v2.2 data) — refresh them whenever three is upgraded.
  */
 export default class Resources extends EventBus {
     constructor(assets, { dracoPath = null } = {}) {
