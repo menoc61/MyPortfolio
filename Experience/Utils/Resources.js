@@ -14,9 +14,13 @@ import { EVENTS } from "./EVENTS.js";
  *    forever behind an opaque full-screen overlay, hiding the whole site.
  *  - assets declare whether they are `critical` (see Utils/assets.js).
  *  - non-critical failures are reported but do not reject the boot.
- *  - the Draco decoder is three's own bundled copy. `DRACOLoader` resolves its
- *    decoder relative to its module URL, so Vite emits it as a hashed, immutable
- *    asset. Pass an explicit `dracoPath` only if you need to self-host it.
+ *  - the Draco decoder is self-hosted (`public/draco`) and wired via
+ *    `dracoPath`. Three's own default resolves the decoder relative to
+ *    `import.meta.url`: Rollup rewrites that for the production build, but
+ *    Vite's dev server cannot serve it (the dep-optimized module lives under
+ *    /node_modules/.vite/deps/), so dev 404s and the critical model never
+ *    loads. The explicit path is the first-commit arrangement and works in
+ *    both dev and build.
  */
 export default class Resources extends EventBus {
     constructor(assets, { dracoPath = null } = {}) {
