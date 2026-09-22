@@ -28,7 +28,7 @@ import { BOOT_STATES } from "./Boot.js";
 GSAP.registerPlugin(ScrollTrigger);
 
 /** How long a trigger/scroll replay stays up once the model is already loaded. */
-const REPLAY_DURATION = 1600;
+const REPLAY_DURATION = 2200;
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -78,17 +78,18 @@ export default class ScenePreloader {
             );
         }
 
-        // Trigger mounts: every element carrying the attribute replays it.
+        // Trigger mounts: delegated so ANY element carrying the attribute
+        // replays it — including buttons added later or re-rendered. (The old
+        // per-button binding also missed the overlay's own `-btn` variant.)
         this._onTriggerClick = (event) => {
+            const button = event.target.closest("[data-scene-preloader-trigger]");
+            if (!button) {
+                return;
+            }
             event.preventDefault();
             this.mount({ mode: "trigger" });
         };
-        this._triggerButtons = [
-            ...document.querySelectorAll("[data-scene-preloader-trigger]"),
-        ];
-        for (const button of this._triggerButtons) {
-            button.addEventListener("click", this._onTriggerClick);
-        }
+        document.addEventListener("click", this._onTriggerClick);
 
         // Scroll mount: entering the footer replays the preloader.
         const scrollMount = document.querySelector("[data-scene-preloader-scroll]");
@@ -132,23 +133,33 @@ export default class ScenePreloader {
     /**
      * The ONLY signal that may clear the gate: the 3D model is fully loaded
      * and mounted. Experience calls this from WORLD_READY — nowhere else.
+     * Resolves once the overlay is fully out of the way, so the intro can
+     * start on a clean stage (no two overlays fighting for the same beat).
      */
     finish() {
-        if (!this.root || this._done) {
-            return;
-        }
-        this._done = true;
+        return new Promise((resolve) => {
+            if (!this.root || this._done) {
+                resolve();
+                return;
+            }
+            this._done = true;
 
-        // Snap the bar, relabel, hold a beat, then lift the curtain — the
-        // first-commit intro (Preloader.js) takes the stage underneath.
-        this._applyProgress(100);
-        if (this.label) {
-            this.label.textContent = "Ready";
-        }
-        this._replayTimer = window.setTimeout(
-            () => this._unmount(),
-            reducedMotion.matches ? 0 : 450
-        );
+            // Snap the bar, relabel, hold a beat, then lift the curtain — the
+            // first-commit intro (Preloader.js) takes the stage underneath.
+            this._applyProgress(100);
+            if (this.label) {
+                this.label.textContent = "Ready";
+            }
+            this._replayTimer = window.setTimeout(
+                () => {
+                    this._unmount();
+                    // Let the CSS fade (var(--dur-slow)) finish before the
+                    // intro begins, so nothing overlaps it.
+                    window.setTimeout(resolve, reducedMotion.matches ? 0 : 600);
+                },
+                reducedMotion.matches ? 0 : 450
+            );
+        });
     }
 
     /**
@@ -173,17 +184,41 @@ export default class ScenePreloader {
         }
 
         if (this._done) {
-            this._animateEntrance();
-            this._replayTimer = window.setTimeout(
-                () => this._unmount(),
-                reducedMotion.matches ? 400 : REPLAY_DURATION
-            );
+            this._replay();
             return;
         }
 
         // Still loading: restore real progress and wait for finish().
         this._animateEntrance();
         this._applyProgress(this._progress);
+    }
+
+    /**
+     * A full replay, not a flash: reset the copy and the bar, run the entrance,
+     * sweep the progress to 100% again, hold, and clear.
+     */
+    _replay() {
+        if (this.label) {
+            this.label.textContent = "Loading the room";
+        }
+        this._applyProgress(0);
+        this._animateEntrance();
+
+        if (this.barFill && !reducedMotion.matches) {
+            const sweep = { value: 0 };
+            this._replayTween = GSAP.to(sweep, {
+                value: 100,
+                duration: 1,
+                delay: 0.45,
+                ease: "power2.inOut",
+                onUpdate: () => this._applyProgress(sweep.value),
+            });
+        }
+
+        this._replayTimer = window.setTimeout(
+            () => this._unmount(),
+            reducedMotion.matches ? 600 : REPLAY_DURATION
+        );
     }
 
     /* -------------------------------------------------------------- teardown */

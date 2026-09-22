@@ -158,8 +158,17 @@
     </div>
 
     <header class="site-header">
-      <a class="brand" href="#hero" aria-label="Gilles Momeni — back to top">
+      <a
+        class="brand"
+        href="/cv/Gilles-Momeni-CV.pdf"
+        download="Gilles-Momeni-CV.pdf"
+        data-tip="Download my CV (PDF)"
+        aria-label="Download Gilles Momeni's CV as PDF"
+      >
         <span class="brand__mark">GM</span>
+        <span class="brand__dl" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="13" height="13"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0 4.5-4.5M12 15l-4.5-4.5M5 19.5h14" /></svg>
+        </span>
       </a>
 
       <nav class="site-nav" aria-label="Primary">
@@ -234,7 +243,7 @@
             <div class="hero-main">
               <h1 class="hero-main-title">Gilles Momeni</h1>
               <p class="hero-main-description">
-                Software Engineer · Full-Stack &amp; Mobile Developer
+                Software Engineer · Data scientist
               </p>
               <p class="hero-lede">
                 I design and build digital products end to end — web, mobile, IoT
@@ -324,46 +333,55 @@
             </div>
 
             <div class="stack">
-              <h3 class="stack__group-title">Frontend &amp; mobile</h3>
-              <ul class="tags">
-                <li class="tag">React</li>
-                <li class="tag">Next.js</li>
-                <li class="tag">TypeScript</li>
-                <li class="tag">JavaScript</li>
-                <li class="tag">React Native</li>
-                <li class="tag">Expo</li>
-                <li class="tag">Flutter</li>
-                <li class="tag">Three.js</li>
-                <li class="tag">GSAP</li>
-                <li class="tag">SCSS</li>
-                <li class="tag">Vite</li>
+              <h3 class="stack__group-title">
+                Frontend &amp; mobile
+                <span class="stack__count">11</span>
+              </h3>
+              <ul class="tags" data-stack-icons>
+                <li class="tag tag--icon" data-tip="React — SPA &amp; component architecture"><img src="/icons/react.svg" alt="" loading="lazy" decoding="async" /><span>React</span></li>
+                <li class="tag tag--icon" data-tip="Next.js — App Router, SSR, edge"><img src="/icons/nextjs.svg" alt="" loading="lazy" decoding="async" /><span>Next.js</span></li>
+                <li class="tag tag--icon" data-tip="TypeScript — strict everywhere"><img src="/icons/typescript.svg" alt="" loading="lazy" decoding="async" /><span>TypeScript</span></li>
+                <li class="tag tag--icon" data-tip="JavaScript ES2023"><img src="/icons/javascript.svg" alt="" loading="lazy" decoding="async" /><span>JavaScript</span></li>
+                <li class="tag tag--icon" data-tip="React Native — Xmoni, FarmAssist"><img src="/icons/reactnative.svg" alt="" loading="lazy" decoding="async" /><span>React Native</span></li>
+                <li class="tag tag--icon" data-tip="Expo — FarmAssist migration"><img src="/icons/expo.svg" alt="" loading="lazy" decoding="async" /><span>Expo</span></li>
+                <li class="tag tag--icon" data-tip="Flutter — first FarmAssist build"><img src="/icons/flutter.svg" alt="" loading="lazy" decoding="async" /><span>Flutter</span></li>
+                <li class="tag tag--icon" data-tip="Three.js — this very room"><img src="/icons/threejs.svg" alt="" loading="lazy" decoding="async" /><span>Three.js</span></li>
+                <li class="tag tag--icon" data-tip="GSAP + ScrollTrigger"><img src="/icons/gsap.svg" alt="" loading="lazy" decoding="async" /><span>GSAP</span></li>
+                <li class="tag tag--icon" data-tip="Sass/SCSS architecture"><img src="/icons/scss.svg" alt="" loading="lazy" decoding="async" /><span>SCSS</span></li>
+                <li class="tag tag--icon" data-tip="Vite — build &amp; dev"><img src="/icons/vite.svg" alt="" loading="lazy" decoding="async" /><span>Vite</span></li>
               </ul>
 
-              <h3 class="stack__group-title">Backend &amp; data</h3>
-              <ul class="tags">
-                <li class="tag">Node.js</li>
-                <li class="tag">Express</li>
-                <li class="tag">GraphQL</li>
-                <li class="tag">Firebase</li>
-                <li class="tag">PostgreSQL</li>
-                <li class="tag">MySQL</li>
-                <li class="tag">MongoDB</li>
-                <li class="tag">DynamoDB</li>
-                <li class="tag">Firestore</li>
-                <li class="tag">PHP</li>
+              <h3 class="stack__group-title">
+                Backend &amp; data
+                <span class="stack__count">10</span>
+              </h3>
+              <ul class="tags" data-stack-icons>
+                <li class="tag tag--icon" data-tip="Node.js — services &amp; tooling"><img src="/icons/nodejs.svg" alt="" loading="lazy" decoding="async" /><span>Node.js</span></li>
+                <li class="tag tag--icon" data-tip="Express — REST APIs"><img src="/icons/express.svg" alt="" loading="lazy" decoding="async" /><span>Express</span></li>
+                <li class="tag tag--icon" data-tip="GraphQL — typed APIs"><img src="/icons/graphql.svg" alt="" loading="lazy" decoding="async" /><span>GraphQL</span></li>
+                <li class="tag tag--icon" data-tip="Firebase — FarmAssist backend"><img src="/icons/firebase.svg" alt="" loading="lazy" decoding="async" /><span>Firebase</span></li>
+                <li class="tag tag--icon" data-tip="PostgreSQL — relational core"><img src="/icons/postgresql.svg" alt="" loading="lazy" decoding="async" /><span>PostgreSQL</span></li>
+                <li class="tag tag--icon" data-tip="MySQL — legacy &amp; client stacks"><img src="/icons/mysql.svg" alt="" loading="lazy" decoding="async" /><span>MySQL</span></li>
+                <li class="tag tag--icon" data-tip="MongoDB — document stores"><img src="/icons/mongodb.svg" alt="" loading="lazy" decoding="async" /><span>MongoDB</span></li>
+                <li class="tag tag--icon" data-tip="DynamoDB — serverless tables"><img src="/icons/dynamodb.svg" alt="" loading="lazy" decoding="async" /><span>DynamoDB</span></li>
+                <li class="tag tag--icon" data-tip="Firestore — realtime sync"><img src="/icons/firebase.svg" alt="" loading="lazy" decoding="async" /><span>Firestore</span></li>
+                <li class="tag tag--icon" data-tip="PHP — client maintenance"><img src="/icons/php.svg" alt="" loading="lazy" decoding="async" /><span>PHP</span></li>
               </ul>
 
-              <h3 class="stack__group-title">Cloud, AI &amp; tooling</h3>
-              <ul class="tags">
-                <li class="tag">Google Cloud</li>
-                <li class="tag">AWS Amplify</li>
-                <li class="tag">Docker</li>
-                <li class="tag">Git</li>
-                <li class="tag">Python</li>
-                <li class="tag">Pandas</li>
-                <li class="tag">NumPy</li>
-                <li class="tag">Power BI</li>
-                <li class="tag">TensorFlow</li>
+              <h3 class="stack__group-title">
+                Cloud, AI &amp; tooling
+                <span class="stack__count">9</span>
+              </h3>
+              <ul class="tags" data-stack-icons>
+                <li class="tag tag--icon" data-tip="Google Cloud — certified 2024"><img src="/icons/googlecloud.svg" alt="" loading="lazy" decoding="async" /><span>Google Cloud</span></li>
+                <li class="tag tag--icon" data-tip="AWS — Amplify, DynamoDB"><img src="/icons/awsamplify.svg" alt="" loading="lazy" decoding="async" /><span>AWS Amplify</span></li>
+                <li class="tag tag--icon" data-tip="Docker — dev &amp; deploy"><img src="/icons/docker.svg" alt="" loading="lazy" decoding="async" /><span>Docker</span></li>
+                <li class="tag tag--icon" data-tip="Git — every day, everywhere"><img src="/icons/git.svg" alt="" loading="lazy" decoding="async" /><span>Git</span></li>
+                <li class="tag tag--icon" data-tip="Python — scripting &amp; ML"><img src="/icons/python.svg" alt="" loading="lazy" decoding="async" /><span>Python</span></li>
+                <li class="tag tag--icon" data-tip="pandas — data wrangling"><img src="/icons/pandas.svg" alt="" loading="lazy" decoding="async" /><span>pandas</span></li>
+                <li class="tag tag--icon" data-tip="NumPy — numerical core"><img src="/icons/numpy.svg" alt="" loading="lazy" decoding="async" /><span>NumPy</span></li>
+                <li class="tag tag--icon" data-tip="Power BI — client reporting"><img src="/icons/powerbi.svg" alt="" loading="lazy" decoding="async" /><span>Power BI</span></li>
+                <li class="tag tag--icon" data-tip="TensorFlow — FarmAssist CNN"><img src="/icons/tensorflow.svg" alt="" loading="lazy" decoding="async" /><span>TensorFlow</span></li>
               </ul>
             </div>
           </div>
@@ -406,11 +424,6 @@
                     security and a low-friction money-management flow for people
                     new to formal finance.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">React Native</li>
-                    <li class="tag">Node.js</li>
-                    <li class="tag">Fintech</li>
-                  </ul>
                   <figure class="project__media">
                     <img
                       src="/images/projects/xmoni.png"
@@ -421,6 +434,23 @@
                       decoding="async"
                     />
                   </figure>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Mobile app"><img src="/icons/reactnative.svg" alt="" loading="lazy" decoding="async" /><span>React Native</span></li>
+                    <li class="tag" data-tip="API layer"><img src="/icons/nodejs.svg" alt="" loading="lazy" decoding="async" /><span>Node.js</span></li>
+                    <li class="tag" data-tip="Domain"><span>Fintech</span></li>
+                  </ul>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://xmoni.io"
+                    rel="noopener"
+                    data-tip="Live product"
+                    aria-label="Xmoni — live product"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 17 17 7M9 7h8v8" /></svg>
+                    <span>Live</span>
+                  </a>
                 </div>
               </li>
 
@@ -442,11 +472,23 @@
                     commerce arm of a company whose wider work spans immigration
                     consulting and custom software.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">E-commerce</li>
-                    <li class="tag">Next.js</li>
-                    <li class="tag">Cloud</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Framework"><img src="/icons/nextjs.svg" alt="" loading="lazy" decoding="async" /><span>Next.js</span></li>
+                    <li class="tag" data-tip="Domain"><span>E-commerce</span></li>
+                    <li class="tag" data-tip="Hosting"><img src="/icons/googlecloud.svg" alt="" loading="lazy" decoding="async" /><span>Cloud</span></li>
                   </ul>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://shop.uhcxplore.com"
+                    rel="noopener"
+                    data-tip="Live store"
+                    aria-label="UHCxplore — live store"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 17 17 7M9 7h8v8" /></svg>
+                    <span>Live</span>
+                  </a>
                 </div>
               </li>
 
@@ -464,10 +506,10 @@
                     so that a single lot and a multi-site network can run on the
                     same operations model.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">IoT</li>
-                    <li class="tag">Realtime</li>
-                    <li class="tag">Payments</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Realtime telemetry"><img src="/icons/nodejs.svg" alt="" loading="lazy" decoding="async" /><span>IoT</span></li>
+                    <li class="tag" data-tip="Live data"><span>Realtime</span></li>
+                    <li class="tag" data-tip="Payments"><span>Payments</span></li>
                   </ul>
                 </div>
               </li>
@@ -486,10 +528,10 @@
                     Recognition simulator — built to prove the ALPR pipeline and the
                     admin tooling before committing to hardware.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">Computer vision</li>
-                    <li class="tag">Dashboard</li>
-                    <li class="tag">Mobile</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Plate recognition"><img src="/icons/python.svg" alt="" loading="lazy" decoding="async" /><span>Computer vision</span></li>
+                    <li class="tag" data-tip="Operator console"><span>Dashboard</span></li>
+                    <li class="tag" data-tip="Field app"><span>Mobile</span></li>
                   </ul>
                 </div>
               </li>
@@ -516,12 +558,24 @@
                     classifier reaches 92%+ accuracy on its test set, and the goal
                     is simple: help farmers lose less of their crop.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">Flutter → Expo</li>
-                    <li class="tag">Firebase</li>
-                    <li class="tag">CNN</li>
-                    <li class="tag">IoT</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="App"><img src="/icons/expo.svg" alt="" loading="lazy" decoding="async" /><span>Expo</span></li>
+                    <li class="tag" data-tip="Backend"><img src="/icons/firebase.svg" alt="" loading="lazy" decoding="async" /><span>Firebase</span></li>
+                    <li class="tag" data-tip="Plant-disease CNN"><img src="/icons/tensorflow.svg" alt="" loading="lazy" decoding="async" /><span>CNN</span></li>
+                    <li class="tag" data-tip="Field telemetry"><span>IoT</span></li>
                   </ul>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://github.com/menoc61/FARMASSIST_MOBILE"
+                    rel="noopener"
+                    data-tip="Source on GitHub"
+                    aria-label="FarmAssist — source on GitHub"
+                  >
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" /></svg>
+                    <span>Code</span>
+                  </a>
                 </div>
               </li>
 
@@ -543,11 +597,23 @@
                     papers from many institutions, backed by a network of 100+
                     expert proofreaders. A problem equals a solution with us.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">EdTech</li>
-                    <li class="tag">Marketplace</li>
-                    <li class="tag">Web + Mobile</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Domain"><span>EdTech</span></li>
+                    <li class="tag" data-tip="Two-sided platform"><span>Marketplace</span></li>
+                    <li class="tag" data-tip="Web + mobile clients"><span>Web + Mobile</span></li>
                   </ul>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://zepythagore.com"
+                    rel="noopener"
+                    data-tip="Visit platform"
+                    aria-label="Zepythagore — visit platform"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 17 17 7M9 7h8v8" /></svg>
+                    <span>Live</span>
+                  </a>
                 </div>
               </li>
 
@@ -569,10 +635,10 @@
                     students and a reference for practitioners. My 3D and
                     interactive-visualisation work applied to education.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">3D visualisation</li>
-                    <li class="tag">Open source</li>
-                    <li class="tag">Education</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Interactive 3D"><img src="/icons/threejs.svg" alt="" loading="lazy" decoding="async" /><span>3D visualisation</span></li>
+                    <li class="tag" data-tip="Open source"><span>Open source</span></li>
+                    <li class="tag" data-tip="Education"><span>Education</span></li>
                   </ul>
                   <figure class="project__media">
                     <img
@@ -584,6 +650,18 @@
                       decoding="async"
                     />
                   </figure>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://github.com/menoc61/x-anatomy"
+                    rel="noopener"
+                    data-tip="Source on GitHub"
+                    aria-label="x-anatomy — source on GitHub"
+                  >
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" /></svg>
+                    <span>Code</span>
+                  </a>
                 </div>
               </li>
 
@@ -606,11 +684,23 @@
                     worked on — several services that have to agree about a
                     passenger, a parcel and a schedule at the same time.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">Monorepo</li>
-                    <li class="tag">TypeScript</li>
-                    <li class="tag">Multi-service</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Repository layout"><span>Monorepo</span></li>
+                    <li class="tag" data-tip="Language"><img src="/icons/typescript.svg" alt="" loading="lazy" decoding="async" /><span>TypeScript</span></li>
+                    <li class="tag" data-tip="Event-driven"><img src="/icons/nodejs.svg" alt="" loading="lazy" decoding="async" /><span>Multi-service</span></li>
                   </ul>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://github.com/menoc61/camermove"
+                    rel="noopener"
+                    data-tip="Source on GitHub"
+                    aria-label="Camermove — source on GitHub"
+                  >
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" /></svg>
+                    <span>Code</span>
+                  </a>
                 </div>
               </li>
 
@@ -631,11 +721,23 @@
                     the same toolkit this page runs on. Where I test motion ideas
                     before they reach client work.
                   </p>
-                  <ul class="tags tags--compact">
-                    <li class="tag">GSAP</li>
-                    <li class="tag">ScrollTrigger</li>
-                    <li class="tag">Vite</li>
+                  <ul class="tags tags--compact" data-stack-badges>
+                    <li class="tag" data-tip="Motion engine"><img src="/icons/gsap.svg" alt="" loading="lazy" decoding="async" /><span>GSAP</span></li>
+                    <li class="tag" data-tip="Scroll choreography"><span>ScrollTrigger</span></li>
+                    <li class="tag" data-tip="Build tool"><img src="/icons/vite.svg" alt="" loading="lazy" decoding="async" /><span>Vite</span></li>
                   </ul>
+                </div>
+                <div class="project__actions">
+                  <a
+                    class="project__action"
+                    href="https://github.com/menoc61/Green-Highlands"
+                    rel="noopener"
+                    data-tip="Source on GitHub"
+                    aria-label="Green Highlands — source on GitHub"
+                  >
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" /></svg>
+                    <span>Code</span>
+                  </a>
                 </div>
               </li>
             </ol>
@@ -792,6 +894,7 @@
     </main>
 
     <footer class="site-footer" data-scene-preloader-scroll>
+      <p class="footer-watermark" aria-hidden="true">Gilles&nbsp;Momeni</p>
       <div class="site-footer__inner">
         <p class="site-footer__line">
           <strong>Gilles Momeni</strong> — software engineer, CTO at UHCx, founder
@@ -805,6 +908,15 @@
           commercial use. Typefaces are open-source and self-hosted.
         </p>
         <div class="site-footer__actions">
+          <a
+            class="scene-preloader__trigger-btn scene-preloader__trigger-btn--icon"
+            href="/cv/Gilles-Momeni-CV.pdf"
+            download="Gilles-Momeni-CV.pdf"
+            data-tip="Download my CV (PDF)"
+          >
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0 4.5-4.5M12 15l-4.5-4.5M5 19.5h14" /></svg>
+            <span>CV</span>
+          </a>
           <button
             type="button"
             class="scene-preloader__trigger-btn"
@@ -835,19 +947,6 @@
         </p>
         <div class="scene-preloader__progress" aria-hidden="true">
           <span class="scene-preloader__bar-fill"></span>
-        </div>
-        <p class="scene-preloader__hint">
-          This only clears once the 3D model is fully loaded.
-        </p>
-        <div class="scene-preloader__trigger">
-          <button
-            type="button"
-            class="scene-preloader__trigger-btn"
-            id="scene-preloader-trigger"
-            data-scene-preloader-trigger-btn
-          >
-            Replay preloader
-          </button>
         </div>
       </div>
     </div>
