@@ -1,0 +1,54 @@
+/**
+ * Scroll-driven reveals, using CSS view timelines only.
+ *
+ * Why CSS and not GSAP: these are Tier 2 "soften" animations (a short fade plus a
+ * tiny rise), they do not need to be synced with the 3D scene, and doing them in
+ * CSS means the content is never hidden by a failed script. Everything here is
+ * inside `@supports` and `prefers-reduced-motion: no-preference`, so a browser
+ * without view timelines — or a reader who asked for less motion — simply gets the
+ * content, at rest, immediately.
+ *
+ * The hero and the section titles are deliberately excluded: they are above the
+ * fold and are the page's LCP element.
+ */
+
+@keyframes reveal-rise {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        .lede,
+        .fact,
+        .stack__group-title,
+        .project,
+        .timeline__item,
+        .contact,
+        .interests__item {
+            animation: reveal-rise linear both;
+            animation-timeline: view();
+            animation-range: entry 0% entry 55%;
+        }
+
+        /* Staggering by nth-child reads as a sequence rather than a block. */
+        .project:nth-child(2n) {
+            animation-range: entry 6% entry 61%;
+        }
+
+        .fact:nth-child(2n) {
+            animation-range: entry 6% entry 61%;
+        }
+    }
+}
+
+/* The interests row hugs the bottom of the page; give it a little presence. */
+.interests__item {
+    will-change: transform;
+}

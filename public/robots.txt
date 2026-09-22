@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# The 3D model and video are decorative; letting crawlers spend budget on them
+# buys nothing.
+Disallow: /models/
+Disallow: /textures/
+Disallow: /draco/
+
+Sitemap: https://gilles-momeni.vercel.app/sitemap.xml

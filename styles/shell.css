@@ -1,0 +1,345 @@
+/**
+ * The shell: canvas, curtain, boot states, split text.
+ *
+ * The single most important rule in this file is the progressive-enhancement
+ * contract: nothing that hides content may depend on JavaScript succeeding.
+ * `html.js` gates the JS-dependent hiding, and `html.is-degraded` undoes it.
+ */
+
+/* ------------------------------------------------------------- canvas ---- */
+
+.experience {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    /* The canvas is decoration; the reader must be able to click through it. */
+    pointer-events: none;
+}
+
+.experience-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* --------------------------------------------------------- boot states --- */
+
+/* While loading or during the intro, the page does not scroll. */
+html.is-loading body,
+html.is-intro body {
+    overflow: hidden;
+}
+
+/* If the scene cannot run, the canvas goes away entirely and the page scrolls. */
+html.is-degraded .experience,
+html.is-degraded .preloader,
+html.is-degraded .arrow-svg-wrapper {
+    display: none;
+}
+
+html.is-degraded .toggle-bar {
+    opacity: 1;
+}
+
+/*
+ * A lost WebGL context leaves a frozen frame behind. Hide it rather than show a
+ * stale image the reader cannot interact with.
+ */
+html.webgl-context-lost .experience {
+    visibility: hidden;
+}
+
+/* ------------------------------------------------------------ curtain ---- */
+
+.preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    background-color: var(--paper);
+    transition:
+        opacity var(--dur-slow) var(--ease-out),
+        visibility var(--dur-slow) var(--ease-out);
+}
+
+.preloader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.preloader-wrapper {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-l);
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--section-about);
+    animation: load 1s var(--ease-standard) infinite;
+}
+
+.circle:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+.circle:nth-child(3) {
+    animation-delay: 0.24s;
+}
+
+/* Tier 3: a loading indicator is essential feedback, so it keeps animating. */
+@keyframes load {
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+
+.preloader-text {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+/* --------------------------------------------------------- split text ---- */
+
+/*
+ * The hero type is split into one span per character for the intro reveal. These
+ * spans are `aria-hidden`; the real words live in a sibling `.sr-only` span
+ * (see Experience/Utils/splitTextToSpans.js).
+ */
+.is-split {
+    overflow: hidden;
+}
+
+.split {
+    display: inline-block;
+}
+
+.animatedis {
+    display: inline-block;
+    will-change: transform;
+}
+
+/*
+ * Only hide the split characters when JavaScript is running. With JS disabled the
+ * text renders normally — the original hid it unconditionally, which meant the
+ * author's own name was absent from the page.
+ */
+html.js .animatedis {
+    transform: translateY(100%);
+}
+
+html.is-degraded .animatedis {
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.js .animatedis {
+        transform: none;
+    }
+}
+
+/* -------------------------------------------------------------- arrow ---- */
+
+.arrow-svg-wrapper {
+    position: absolute;
+    left: 50%;
+    bottom: var(--space-l);
+    opacity: 0;
+    color: var(--ink-soft);
+    transform: translateX(-50%);
+}
+
+.arrow-svg-wrapper.is-hidden {
+    display: none;
+}
+
+/* ---------------------------------------------------------- theme swap --- */
+
+/* Applied for the very first paint, before any transition should be visible. */
+.theme-no-transition,
+.theme-no-transition *,
+.theme-no-transition *::before,
+.theme-no-transition *::after {
+    transition: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 320ms;
+    animation-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(root),
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
+    }
+}
+
+/* ============================================================ scene preloader */
+
+/*
+ * Custom animated preloader that only clears once the 3D model is fully loaded
+ * and mounted. It can be mounted on scroll (a pinned section) or on an explicit
+ * JS trigger.
+ *
+ * z-index sits just above the intro curtain so the two never collide.
+ */
+.scene-preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: grid;
+    place-items: center;
+    background-color: var(--paper);
+    opacity: 1;
+    visibility: visible;
+    transition:
+        opacity var(--dur-slow) var(--ease-out),
+        visibility var(--dur-slow) var(--ease-out);
+    will-change: opacity, visibility;
+}
+
+.scene-preloader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.scene-preloader__stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-m);
+    will-change: transform, opacity;
+}
+
+.scene-preloader__spinner {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    will-change: transform, opacity;
+}
+
+.scene-preloader__ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--section-about);
+    border-radius: 50%;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.scene-preloader__ring--b {
+    inset: 6px;
+    border-color: var(--section-work);
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.scene-preloader__label {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.scene-preloader__title {
+    display: block;
+}
+
+.scene-preloader__hint {
+    font-family: var(--font-body);
+    font-size: var(--step-1);
+    color: var(--ink);
+    margin-top: var(--space-s);
+}
+
+.scene-preloader__trigger {
+    margin-top: var(--space-m);
+}
+
+.scene-preloader__trigger-btn {
+    appearance: none;
+    border: 1px solid var(--hairline);
+    background-color: var(--paper-raised);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-s);
+    transition:
+        background-color var(--dur-base) var(--ease-standard),
+        border-color var(--dur-base) var(--ease-standard);
+}
+
+.scene-preloader__trigger-btn:hover {
+    background-color: var(--paper-sunk);
+    border-color: var(--ink-soft);
+}
+
+.scene-preloader__trigger-btn:focus-visible {
+    outline: 2px solid var(--acid);
+    outline-offset: 2px;
+}
+
+.scene-preloader__trigger-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Scroll/trigger replay: the overlay is transient, so it must never swallow
+   the pointer — the reader keeps scrolling underneath it. */
+.scene-preloader--scroll {
+    pointer-events: none;
+}
+
+/* Progress: real GLB byte progress mapped to 0–90% by ScenePreloader;
+   finish() snaps the last 10% when the model is mounted in the scene. */
+.scene-preloader__progress {
+    width: min(240px, 56vw);
+    height: 2px;
+    background-color: var(--hairline);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.scene-preloader__bar-fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--ink);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    will-change: transform;
+}
+
+/* Without JS the gate could never clear — never show it at all. And once the
+   boot has failed, the readable page replaces the scene entirely. */
+html:not(.js) .scene-preloader,
+html.is-degraded .scene-preloader,
+html:not(.js) [data-scene-preloader-trigger],
+html.is-degraded [data-scene-preloader-trigger] {
+    display: none;
+}

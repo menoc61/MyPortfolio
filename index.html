@@ -2,187 +2,856 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="logo inc.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gilles Momeni</title>
+
+    <!--
+      Marks the document as JS-capable before anything paints. The split-text and
+      intro styles are scoped to `html.js`, so with JavaScript disabled or broken
+      the page renders as plain, readable HTML instead of invisible type.
+    -->
+    <script>
+      document.documentElement.classList.add("js", "is-loading");
+    </script>
+
+    <title>Gilles Momeni — Full-Stack &amp; Mobile Developer, CTO at UHCx</title>
+    <meta
+      name="description"
+      content="Gilles Momeni (menoc61) is a Cameroon-based software engineer, CTO at UHCx and founder of Zepythagore. Full-stack web, mobile, IoT, AI and data science — building products for clients worldwide."
+    />
+    <link rel="canonical" href="https://gilles-momeni.vercel.app/" />
+    <meta name="author" content="Gilles Momeni" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#f7f1e3" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Gilles Momeni" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://gilles-momeni.vercel.app/" />
+    <meta
+      property="og:title"
+      content="Gilles Momeni — Full-Stack &amp; Mobile Developer, CTO at UHCx"
+    />
+    <meta
+      property="og:description"
+      content="Software engineer, CTO at UHCx and founder of Zepythagore. Full-stack web, mobile, IoT, AI and data science."
+    />
+    <meta property="og:image" content="https://gilles-momeni.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Gilles Momeni — software engineer, CTO at UHCx, founder of Zepythagore"
+    />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@GilleMomeni" />
+    <meta name="twitter:creator" content="@GilleMomeni" />
+    <meta
+      name="twitter:title"
+      content="Gilles Momeni — Full-Stack &amp; Mobile Developer, CTO at UHCx"
+    />
+    <meta
+      name="twitter:description"
+      content="Software engineer, CTO at UHCx and founder of Zepythagore. Full-stack web, mobile, IoT, AI and data science."
+    />
+    <meta name="twitter:image" content="https://gilles-momeni.vercel.app/og-image.png" />
+
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icon-200.png" sizes="200x200" type="image/png" />
+    <link rel="apple-touch-icon" href="/icon-200.png" />
+    <link rel="preload" href="/models/Finale Version 16.glb" as="fetch" crossorigin="anonymous" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+    <!-- Faster connection setup to the hosts actually used -->
+    <link rel="preconnect" href="https://github.com" />
+
+    <!--
+      JSON-LD. Keep this in sync with the visible copy in <main> — the two are the
+      same facts stated twice, once for machines and once for readers.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Gilles Momeni",
+        "alternateName": "menoc61",
+        "url": "https://gilles-momeni.vercel.app/",
+        "image": "https://gilles-momeni.vercel.app/icon-200.png",
+        "email": "mailto:gillemomeni@gmail.com",
+        "jobTitle": "Software Engineer",
+        "description": "Full-stack and mobile software engineer, CTO at UHCx and founder of Zepythagore.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "CM"
+        },
+        "worksFor": {
+          "@type": "Organization",
+          "name": "UHCx (United Horizon Corporation)",
+          "url": "https://uhcxplore.com"
+        },
+        "founder": {
+          "@type": "Organization",
+          "name": "Zepythagore",
+          "url": "https://zepythagore.com"
+        },
+        "hasCredential": {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "Master's degree",
+          "name": "Master in Data Science"
+        },
+        "knowsAbout": [
+          "Full-stack web development",
+          "React",
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "GraphQL",
+          "React Native",
+          "Flutter",
+          "Three.js and WebGL",
+          "Machine learning",
+          "Data science",
+          "Internet of Things",
+          "Firebase",
+          "Google Cloud",
+          "AWS"
+        ],
+        "award": [
+          "MTN Cameroon Hackathon — Mobile Money (2022)",
+          "MTN Cameroon Hackathon — Startup (2023)",
+          "Huawei ICT Competition — National round, Cameroon (2023)",
+          "GETECH Cameroon (2023)",
+          "GICOM Cameroon National Congress (2023)"
+        ],
+        "sameAs": [
+          "https://github.com/menoc61",
+          "https://www.linkedin.com/in/gille-momeni-9087121bb/",
+          "https://twitter.com/GilleMomeni",
+          "https://t.me/gillemomeni"
+        ]
+      }
+    </script>
   </head>
+
   <body class="light-theme">
-    <div class="experience">
+    <a class="skip-link" href="#about">Skip to content</a>
+
+    <!-- The WebGL diorama. Decorative: everything it conveys is repeated in text below. -->
+    <div class="experience" aria-hidden="true">
       <canvas class="experience-canvas"></canvas>
     </div>
 
-    <!-- Preloader -->
-    <div class="preloader">
+    <!-- Curtain. Dismissed by Boot — see Experience/Boot.js. -->
+    <div class="preloader" role="status" aria-live="polite">
       <div class="preloader-wrapper">
-        <div class="loading">
-          <div class="circle"></div>
-          <div class="circle"></div>
-          <div class="circle"></div>
+        <div class="loading" aria-hidden="true">
+          <span class="circle"></span>
+          <span class="circle"></span>
+          <span class="circle"></span>
         </div>
+        <p class="preloader-text">Loading the room…</p>
       </div>
     </div>
 
-    <div class="page" asscroll-container>
+    <header class="site-header">
+      <a class="brand" href="#hero" aria-label="Gilles Momeni — back to top">
+        <span class="brand__mark">GM</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <ul class="site-nav__list">
+          <li><a class="site-nav__link" href="#work">Work</a></li>
+          <li><a class="site-nav__link" href="#about">About</a></li>
+          <li><a class="site-nav__link" href="#awards">Awards</a></li>
+          <li><a class="site-nav__link" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
 
       <div class="toggle-bar">
-        <div class="sun-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24"><path fill="currentColor" d="M12 5Q11.575 5 11.288 4.712Q11 4.425 11 4V2Q11 1.575 11.288 1.287Q11.575 1 12 1Q12.425 1 12.713 1.287Q13 1.575 13 2V4Q13 4.425 12.713 4.712Q12.425 5 12 5ZM16.95 7.05Q16.675 6.775 16.675 6.362Q16.675 5.95 16.95 5.65L18.35 4.225Q18.65 3.925 19.062 3.925Q19.475 3.925 19.775 4.225Q20.05 4.5 20.05 4.925Q20.05 5.35 19.775 5.625L18.35 7.05Q18.075 7.325 17.65 7.325Q17.225 7.325 16.95 7.05ZM20 13Q19.575 13 19.288 12.712Q19 12.425 19 12Q19 11.575 19.288 11.287Q19.575 11 20 11H22Q22.425 11 22.712 11.287Q23 11.575 23 12Q23 12.425 22.712 12.712Q22.425 13 22 13ZM12 23Q11.575 23 11.288 22.712Q11 22.425 11 22V20Q11 19.575 11.288 19.288Q11.575 19 12 19Q12.425 19 12.713 19.288Q13 19.575 13 20V22Q13 22.425 12.713 22.712Q12.425 23 12 23ZM5.65 7.05 4.225 5.65Q3.925 5.35 3.925 4.925Q3.925 4.5 4.225 4.225Q4.5 3.95 4.925 3.95Q5.35 3.95 5.625 4.225L7.05 5.65Q7.325 5.925 7.325 6.35Q7.325 6.775 7.05 7.05Q6.75 7.325 6.35 7.325Q5.95 7.325 5.65 7.05ZM18.35 19.775 16.95 18.35Q16.675 18.05 16.675 17.638Q16.675 17.225 16.95 16.95Q17.225 16.675 17.638 16.675Q18.05 16.675 18.35 16.95L19.775 18.35Q20.075 18.625 20.062 19.05Q20.05 19.475 19.775 19.775Q19.475 20.075 19.05 20.075Q18.625 20.075 18.35 19.775ZM2 13Q1.575 13 1.288 12.712Q1 12.425 1 12Q1 11.575 1.288 11.287Q1.575 11 2 11H4Q4.425 11 4.713 11.287Q5 11.575 5 12Q5 12.425 4.713 12.712Q4.425 13 4 13ZM4.225 19.775Q3.95 19.5 3.95 19.075Q3.95 18.65 4.225 18.375L5.65 16.95Q5.925 16.675 6.338 16.675Q6.75 16.675 7.05 16.95Q7.35 17.25 7.35 17.663Q7.35 18.075 7.05 18.375L5.65 19.775Q5.35 20.075 4.925 20.075Q4.5 20.075 4.225 19.775ZM12 18Q9.5 18 7.75 16.25Q6 14.5 6 12Q6 9.5 7.75 7.75Q9.5 6 12 6Q14.5 6 16.25 7.75Q18 9.5 18 12Q18 14.5 16.25 16.25Q14.5 18 12 18ZM12 16Q13.65 16 14.825 14.825Q16 13.65 16 12Q16 10.35 14.825 9.175Q13.65 8 12 8Q10.35 8 9.175 9.175Q8 10.35 8 12Q8 13.65 9.175 14.825Q10.35 16 12 16Z"/></svg>
-        </div>
-        <button class="toggle-button">
-          <div class="toggle-circle"></div>
-        </button>
-        <div class="moon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24"><path fill="currentColor" d="M12 21Q8.25 21 5.625 18.375Q3 15.75 3 12Q3 8.25 5.625 5.625Q8.25 3 12 3Q12.35 3 12.688 3.025Q13.025 3.05 13.35 3.1Q12.325 3.825 11.713 4.987Q11.1 6.15 11.1 7.5Q11.1 9.75 12.675 11.325Q14.25 12.9 16.5 12.9Q17.875 12.9 19.025 12.287Q20.175 11.675 20.9 10.65Q20.95 10.975 20.975 11.312Q21 11.65 21 12Q21 15.75 18.375 18.375Q15.75 21 12 21ZM12 19Q14.2 19 15.95 17.788Q17.7 16.575 18.5 14.625Q18 14.75 17.5 14.825Q17 14.9 16.5 14.9Q13.425 14.9 11.262 12.738Q9.1 10.575 9.1 7.5Q9.1 7 9.175 6.5Q9.25 6 9.375 5.5Q7.425 6.3 6.213 8.05Q5 9.8 5 12Q5 14.9 7.05 16.95Q9.1 19 12 19ZM11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Q11.75 12.25 11.75 12.25Z"/></svg>
-        </div>
-      </div>
-      
-      <div class="page-wrapper" asscroll>
-        <section class="hero">
-          <div class="hero-wrapper">
+        <span class="icon-sun" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" focusable="false">
+            <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <path
+                d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"
+              />
+            </g>
+          </svg>
+        </span>
 
-            <!-- Intro Stuff -->
+        <button
+          class="toggle-button"
+          type="button"
+          aria-pressed="false"
+          aria-label="Switch to dark theme"
+        >
+          <span class="toggle-circle" aria-hidden="true"></span>
+        </button>
+
+        <span class="icon-moon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" focusable="false">
+            <path
+              d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.7 8.7 0 1 0 11.1 11.1Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+      </div>
+    </header>
+
+    <main class="page" id="top">
+      <div class="page-inner">
+        <!-- ============================== HERO ============================== -->
+        <section class="hero" id="hero">
+          <div class="hero-wrapper">
             <div class="intro-text">Welcome to my portfolio!</div>
-            <div class="arrow-svg-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24"><path fill="currentColor" d="M12 14.95q-.2 0-.375-.063-.175-.062-.325-.212L6.675 10.05q-.275-.275-.262-.688.012-.412.287-.687.275-.275.7-.275.425 0 .7.275l3.9 3.9 3.925-3.925q.275-.275.688-.263.412.013.687.288.275.275.275.7 0 .425-.275.7l-4.6 4.6q-.15.15-.325.212-.175.063-.375.063Z"/></svg>
+
+            <div class="arrow-svg-wrapper" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24" focusable="false">
+                <path
+                  d="M12 4v14m0 0 6-6m-6 6-6-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </div>
+
+            <p class="hero-status">
+              <span class="hero-status__dot" aria-hidden="true"></span>
+              Available for contracts &amp; full-time roles
+            </p>
 
             <div class="hero-main">
               <h1 class="hero-main-title">Gilles Momeni</h1>
-              <p class="hero-main-description">Software Engineer | FULLSTACK JS DEVELOPER</p>
+              <p class="hero-main-description">
+                Software Engineer · Full-Stack &amp; Mobile Developer
+              </p>
+              <p class="hero-lede">
+                I design and build digital products end to end — web, mobile, IoT
+                and AI. Currently CTO at UHCx, founder of Zepythagore, and a
+                Cameroon-based engineer working with clients worldwide.
+              </p>
+              <div class="hero-actions">
+                <a class="button button--solid" href="#work">See the work</a>
+                <a class="button button--ghost" href="mailto:gillemomeni@gmail.com">
+                  Start a project
+                </a>
+              </div>
             </div>
 
             <div class="hero-second">
-              <p class="hero-second-subheading first-sub">Welcome to</p>
-              <p class="hero-second-subheading second-sub">My Portfolio </p>
+              <p class="hero-second-subheading first-sub">Based in Cameroon,</p>
+              <p class="hero-second-subheading second-sub">building worldwide</p>
             </div>
-
           </div>
         </section>
 
-        <div class="first-move section-margin"></div>
+        <div class="story-step story-step--1" aria-hidden="true"></div>
 
-        <section class="first-section section left">
-          <div class="progress-wrapper progress-bar-wrapper-left">
-            <div class="progress-bar"></div>
+        <!-- ============================== ABOUT ============================== -->
+        <section class="section section--about" id="about" data-section>
+          <div class="progress-wrapper" aria-hidden="true">
+            <div class="progress-bar progress-bar--pink"></div>
           </div>
 
           <div class="section-intro-wrapper">
-            <h1 class="section-title">
-              <span class="section-title-text">About Me</span>
-              <div class="section-title-decoration styleOne"></div>
-              <div class="section-title-decoration styleTwo"></div>
-              <div class="section-title-decoration styleThree"></div>
-            </h1>
-            <span class="section-number">01</span>
-          </div>
-          
-
-          <div class="section-detail-wrapper">
-            <!-- <h3 class="section-heading">Hello!</h3> -->
-            <p class="section-text">Hi there 👋!, Welcome to my portfolio! I'm a third-year Software Engineering student from Cameroon .</p>
-            <p class="section-text">A full stack JS developer, innovative, creative,
-              capable to work in team and quick problem
-              solution both on native hybrid application as on
-              web, masters the following technologies:</p>
-            <h3 class="section-heading">Frontend Technologies:</h3>
-            <p class="section-text">React JS, Next JS, Vanilla
-              JS, JavaScript, TypeScript, Bootstrap, SCSS,
-              MaterialUI, JQuerry, PHP, three.js (3D rendering
-              on web).</p>
-            <h3 class="section-heading">Mobile dev:</h3>
-            <p class="section-text"> React Native.</p>
-            <h3 class="section-heading">Backend Technologies:</h3>
-            <p class="section-text"> Node JS, EXPRESS, GraphQl.</p>
-            <h3 class="section-heading">Backend Technologies:</h3>
-            <p class="section-text"> Node JS, EXPRESS, GraphQl.</p>
-            <h3 class="section-heading">Cloud backend services:</h3>
-            <p class="section-text"> Google Cloud, AWS Amplify, Firebase v9.</p>
-            <h3 class="section-heading">Database service:</h3>
-            <p class="section-text"> MySQL, PostgreSQL, MongoDB, DynamoDB, FireStore..</p>
-
-          </div>
-        </section>
-
-        <div class="second-move section-margin"></div>
-
-        <section class="second-section section right">
-          <div class="progress-wrapper progress-bar-wrapper-right">
-            <div class="progress-bar blue-background"></div>
-          </div>
-
-          <div class="section-intro-wrapper blue-text blue-border">
-            <h1 class="section-title blue-text blue-border">
-              <span class="section-title-text blue-text">My Work</span>
-              <div class="section-title-decoration styleOne blue-border"></div>
-              <div class="section-title-decoration styleTwo blue-border"></div>
-              <div class="section-title-decoration styleThree blue-background blue-border"></div>
-            </h1>
-            <span class="section-number blue-text">02</span>
+            <header class="section-heading-block">
+              <p class="section-eyebrow">01 — About</p>
+              <h2 class="section-title"><span class="section-title-text">About</span></h2>
+            </header>
           </div>
 
           <div class="section-detail-wrapper">
-            <h3 class="section-heading">Here is the list of all public deployed project</h3>
-            <p class="section-text">Thier project description would be given on thier respective repository regardless of the mobile apps</p>
-            <h3 class="section-heading">1. Zepythagore</h3>
-            <p class="section-text">A plateform which would permit university student to get
-               more easily past Papers of different schools accross the teritory 
-               <b>DEMO <a href="https://zepythagore.com">zepythagore.com</a></b>
-            </p>
-            <h3 class="section-heading">2. Nextgel</h3>
-            <p class="section-text">Smart Classroom System for efficient virtual learning. It facilitates multiple necessary and useful features under a room.
-               <b>DEMO <a href="https://nextgel-97457.web.app/">Nextgel.web.app</a></b>
-            </p>
-            <h3 class="section-heading">3. voteUs</h3>
-            <p class="section-text">A plateform which would permit do do the election of the student comitee this can be applied to multiple other scenarios which
-               increases the reusability effect of the Deceltralise Application (BLOCKCHAIN DAPP) 
-               <b>DEMO <a href="http://voteus-landing-page.vercel.app/">voteus-landing-page.vercel.app</a></b>
-            </p>
-            <h3 class="section-heading">4. Menocorp Landing</h3>
-            <p class="section-text">A landing Page to train on the gsap animation library
-               <b>DEMO <a href="http://animatedlayout.vercel.app/">animatedlayout.vercel.app</a></b>
-            </p>
-            <h3 class="section-heading">5. Meno Real Estate</h3>
-            <p class="section-text">A renting and buying of houses has nerver be as simpler as know meno real estate provide advance search
-               funtionalities to match users need or requirement
-               <b>DEMO <a href="http://real-estate-nu-lake.vercel.app/">real-estate-nu-lake.vercel.app</a></b>
-            </p>
-            <p class="section-text">... For more project details contact me :)</p>
+            <div class="lede-block">
+              <p class="lede">
+                I use my passion and skills to build digital products and
+                experiences. National and international clients rely on me for the
+                design, implementation and delivery of their enterprise digital
+                projects — and I work alongside web agencies, companies, startups
+                and individuals to shape the blueprint for a digital business.
+              </p>
+              <p class="lede">
+                Today I lead technology at UHCx and run Zepythagore, the EdTech
+                startup I founded in 2021. I advise and partner with fintech and
+                SaaS startups, and I write about building software.
+              </p>
+            </div>
+
+            <div class="facts">
+              <div class="fact">
+                <h3 class="fact__label">Currently</h3>
+                <ul class="fact__list">
+                  <li>CTO — <strong>UHCx</strong> (United Horizon Corporation)</li>
+                  <li>Founder — <strong>Zepythagore</strong> (EdTech, 2021)</li>
+                </ul>
+              </div>
+              <div class="fact">
+                <h3 class="fact__label">Focus</h3>
+                <ul class="fact__list">
+                  <li>Full-stack web applications</li>
+                  <li>Mobile apps — iOS &amp; Android</li>
+                  <li>Data science &amp; machine learning</li>
+                  <li>Robotics &amp; IoT integration</li>
+                  <li>Technical leadership &amp; startup building</li>
+                </ul>
+              </div>
+              <div class="fact">
+                <h3 class="fact__label">Working with me</h3>
+                <ul class="fact__list">
+                  <li>4+ years professional development</li>
+                  <li>WAT (UTC+1), flexible for international teams</li>
+                  <li>English · French · Russian</li>
+                  <li>Replies within 24 hours</li>
+                </ul>
+              </div>
+              <div class="fact">
+                <h3 class="fact__label">Education</h3>
+                <ul class="fact__list">
+                  <li>Master in Data Science</li>
+                  <li>Google Cloud certified (2024)</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="stack">
+              <h3 class="stack__group-title">Frontend &amp; mobile</h3>
+              <ul class="tags">
+                <li class="tag">React</li>
+                <li class="tag">Next.js</li>
+                <li class="tag">TypeScript</li>
+                <li class="tag">JavaScript</li>
+                <li class="tag">React Native</li>
+                <li class="tag">Expo</li>
+                <li class="tag">Flutter</li>
+                <li class="tag">Three.js</li>
+                <li class="tag">GSAP</li>
+                <li class="tag">SCSS</li>
+                <li class="tag">Vite</li>
+              </ul>
+
+              <h3 class="stack__group-title">Backend &amp; data</h3>
+              <ul class="tags">
+                <li class="tag">Node.js</li>
+                <li class="tag">Express</li>
+                <li class="tag">GraphQL</li>
+                <li class="tag">Firebase</li>
+                <li class="tag">PostgreSQL</li>
+                <li class="tag">MySQL</li>
+                <li class="tag">MongoDB</li>
+                <li class="tag">DynamoDB</li>
+                <li class="tag">Firestore</li>
+                <li class="tag">PHP</li>
+              </ul>
+
+              <h3 class="stack__group-title">Cloud, AI &amp; tooling</h3>
+              <ul class="tags">
+                <li class="tag">Google Cloud</li>
+                <li class="tag">AWS Amplify</li>
+                <li class="tag">Docker</li>
+                <li class="tag">Git</li>
+                <li class="tag">Python</li>
+                <li class="tag">Pandas</li>
+                <li class="tag">NumPy</li>
+                <li class="tag">Power BI</li>
+                <li class="tag">TensorFlow</li>
+              </ul>
+            </div>
           </div>
         </section>
 
-        <div class="third-move section-margin"></div>
+        <div class="story-step story-step--2" aria-hidden="true"></div>
 
-        <section class="third-section section left">
-          <div class="progress-wrapper progress-bar-wrapper-left">
-            <div class="progress-bar green-background"></div>
+        <!-- ============================== WORK ============================== -->
+        <section class="section section--work" id="work" data-section>
+          <div class="progress-wrapper" aria-hidden="true">
+            <div class="progress-bar progress-bar--blue"></div>
           </div>
 
-          <div class="section-intro-wrapper green-text green-border">
-            <h1 class="section-title green-text green-border">
-              <span class="section-title-text green-text">Contact Me</span>
-              <div class="section-title-decoration styleOne green-border"></div>
-              <div class="section-title-decoration styleTwo green-border"></div>
-              <div class="section-title-decoration styleThree green-background green-border"></div>
-            </h1>
-            <span class="section-number green-text">03</span>
+          <div class="section-intro-wrapper">
+            <header class="section-heading-block">
+              <p class="section-eyebrow">02 — Work</p>
+              <h2 class="section-title"><span class="section-title-text">Work</span></h2>
+            </header>
+            <p class="section-sub">
+              Products I have designed, built and shipped — with the role I played
+              on each. Client work that is not public is listed without a link.
+            </p>
           </div>
 
           <div class="section-detail-wrapper">
-            <h3 class="section-heading">Github</h3>
-            <p class="section-text"><a href="https://github.com/menoc61">github.com/menoc61</a></p>
-            <h3 class="section-heading">twitter</h3>
-            <p class="section-text"><a href="https://twitter.com/GilleMomeni">@GilleMomeni</a></p>
-            <h3 class="section-heading">Gmail</h3>
-            <p class="section-text"><a href="mailto:gillemomeni@gmail.com">gillemomeni@gmail.com</a>
-            <h3 class="section-heading">LinkedIn</h3>
-            <p class="section-text"><a href="https://www.linkedin.com/in/gille-momeni-9087121bb/">https://www.linkedin.com/in/gillemomeni</a></p>
-            <h3 class="section-heading">whatApp</h3>
-            <p class="section-text"><a href=" https://wa.me/+237693972665">+237 693 972 665</a></p>
+            <ol class="projects">
+              <li class="project">
+                <p class="project__index" aria-hidden="true">01</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a class="project__link" href="https://xmoni.io" rel="noopener">Xmoni</a>
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2025</span>
+                    <span class="project__role">UI/UX · Frontend · Backend</span>
+                  </p>
+                  <p class="project__text">
+                    A complete, cross-platform micro-finance product: transfers,
+                    secure payments and savings tools in one place. Built around
+                    security and a low-friction money-management flow for people
+                    new to formal finance.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">React Native</li>
+                    <li class="tag">Node.js</li>
+                    <li class="tag">Fintech</li>
+                  </ul>
+                  <figure class="project__media">
+                    <img
+                      src="/images/projects/xmoni.png"
+                      alt="Xmoni app screens: virtual cards, wallet balance and transfers"
+                      width="632"
+                      height="640"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </figure>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">02</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a class="project__link" href="https://shop.uhcxplore.com" rel="noopener">
+                      UHCxplore
+                    </a>
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2024</span>
+                    <span class="project__role">CTO · Full stack</span>
+                  </p>
+                  <p class="project__text">
+                    An e-commerce platform for UHCx (United Horizon Corporation),
+                    covering catalogue, checkout and order operations — the
+                    commerce arm of a company whose wider work spans immigration
+                    consulting and custom software.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">E-commerce</li>
+                    <li class="tag">Next.js</li>
+                    <li class="tag">Cloud</li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">03</p>
+                <div class="project__body">
+                  <h3 class="project__title">Autospace</h3>
+                  <p class="project__meta">
+                    <span class="project__year">2024</span>
+                    <span class="project__role">UI/UX · Frontend · Backend</span>
+                  </p>
+                  <p class="project__text">
+                    A parking management suite for facilities of any size: live bay
+                    availability, automated payment and occupancy reporting. Built
+                    so that a single lot and a multi-site network can run on the
+                    same operations model.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">IoT</li>
+                    <li class="tag">Realtime</li>
+                    <li class="tag">Payments</li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">04</p>
+                <div class="project__body">
+                  <h3 class="project__title">Parking Management — Admin &amp; ALPR</h3>
+                  <p class="project__meta">
+                    <span class="project__year">2024</span>
+                    <span class="project__role">Developer demo</span>
+                  </p>
+                  <p class="project__text">
+                    A technical demonstration pairing a user-facing mobile app with
+                    an operator dashboard and an Automated License Plate
+                    Recognition simulator — built to prove the ALPR pipeline and the
+                    admin tooling before committing to hardware.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">Computer vision</li>
+                    <li class="tag">Dashboard</li>
+                    <li class="tag">Mobile</li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">05</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a
+                      class="project__link"
+                      href="https://github.com/menoc61/FARMASSIST_MOBILE"
+                      rel="noopener"
+                      >FarmAssist</a
+                    >
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2023</span>
+                    <span class="project__role">UI/UX · Frontend · Backend</span>
+                  </p>
+                  <p class="project__text">
+                    A data-driven farming app pairing IoT field telemetry with
+                    machine-learning plant-disease detection. Started in Flutter,
+                    later migrated to Expo, with Firebase as the backend. The
+                    classifier reaches 92%+ accuracy on its test set, and the goal
+                    is simple: help farmers lose less of their crop.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">Flutter → Expo</li>
+                    <li class="tag">Firebase</li>
+                    <li class="tag">CNN</li>
+                    <li class="tag">IoT</li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">06</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a class="project__link" href="https://zepythagore.com" rel="noopener">
+                      Zepythagore
+                    </a>
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2021</span>
+                    <span class="project__role">Founder · UI/UX · Backend</span>
+                  </p>
+                  <p class="project__text">
+                    The EdTech startup I founded: a platform giving university
+                    students across the territory easy access to past examination
+                    papers from many institutions, backed by a network of 100+
+                    expert proofreaders. A problem equals a solution with us.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">EdTech</li>
+                    <li class="tag">Marketplace</li>
+                    <li class="tag">Web + Mobile</li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">07</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a class="project__link" href="https://github.com/menoc61/x-anatomy" rel="noopener">
+                      x-anatomy
+                    </a>
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2025</span>
+                    <span class="project__role">Personal project</span>
+                  </p>
+                  <p class="project__text">
+                    An open-source anatomy explorer: an interactive, detailed
+                    visualisation of the human body built as a study aid for
+                    students and a reference for practitioners. My 3D and
+                    interactive-visualisation work applied to education.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">3D visualisation</li>
+                    <li class="tag">Open source</li>
+                    <li class="tag">Education</li>
+                  </ul>
+                  <figure class="project__media">
+                    <img
+                      src="/images/projects/xanatomy.jpg"
+                      alt="x-anatomy: 3D anatomy explorer with reference lines and movement planes"
+                      width="300"
+                      height="168"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </figure>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">08</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a class="project__link" href="https://github.com/menoc61/camermove" rel="noopener">
+                      Camermove
+                    </a>
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2026</span>
+                    <span class="project__role">Architecture · Full stack</span>
+                  </p>
+                  <p class="project__text">
+                    A monorepo for interurban transport: event management,
+                    package management and multi-service coordination in one
+                    deployment. The most demanding piece of system design I have
+                    worked on — several services that have to agree about a
+                    passenger, a parcel and a schedule at the same time.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">Monorepo</li>
+                    <li class="tag">TypeScript</li>
+                    <li class="tag">Multi-service</li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="project">
+                <p class="project__index" aria-hidden="true">09</p>
+                <div class="project__body">
+                  <h3 class="project__title">
+                    <a class="project__link" href="https://github.com/menoc61/Green-Highlands" rel="noopener">
+                      Green Highlands
+                    </a>
+                  </h3>
+                  <p class="project__meta">
+                    <span class="project__year">2026</span>
+                    <span class="project__role">Personal project</span>
+                  </p>
+                  <p class="project__text">
+                    An animated scroll experience built to push on GSAP and Vite —
+                    the same toolkit this page runs on. Where I test motion ideas
+                    before they reach client work.
+                  </p>
+                  <ul class="tags tags--compact">
+                    <li class="tag">GSAP</li>
+                    <li class="tag">ScrollTrigger</li>
+                    <li class="tag">Vite</li>
+                  </ul>
+                </div>
+              </li>
+            </ol>
+
+            <!-- ============================= AWARDS ============================= -->
+            <section class="awards" id="awards" aria-labelledby="awards-title">
+              <h3 class="awards__title" id="awards-title">
+                Awards &amp; recognition
+                <span class="awards__range">2021 — 2025</span>
+              </h3>
+
+              <ol class="timeline">
+                <li class="timeline__item">
+                  <span class="timeline__year">2025</span>
+                  <span class="timeline__what">Xmoni shipped — micro-finance SaaS</span>
+                </li>
+                <li class="timeline__item">
+                  <span class="timeline__year">2025</span>
+                  <span class="timeline__what">x-anatomy — open-source 3D anatomy explorer</span>
+                </li>
+                <li class="timeline__item">
+                  <span class="timeline__year">2024</span>
+                  <span class="timeline__what">UHCxplore launched — e-commerce for UHCx</span>
+                </li>
+                <li class="timeline__item">
+                  <span class="timeline__year">2024</span>
+                  <span class="timeline__what">Google Cloud certification</span>
+                </li>
+                <li class="timeline__item">
+                  <span class="timeline__year">2024</span>
+                  <span class="timeline__what">Russian language certification</span>
+                </li>
+                <li class="timeline__item">
+                  <span class="timeline__year">2024</span>
+                  <span class="timeline__what">Master in Data Science</span>
+                </li>
+                <li class="timeline__item timeline__item--award">
+                  <span class="timeline__year">2023</span>
+                  <span class="timeline__what">
+                    Huawei ICT Competition — national round, Cameroon
+                  </span>
+                </li>
+                <li class="timeline__item timeline__item--award">
+                  <span class="timeline__year">2023</span>
+                  <span class="timeline__what">GETECH Cameroon</span>
+                </li>
+                <li class="timeline__item timeline__item--award">
+                  <span class="timeline__year">2023</span>
+                  <span class="timeline__what">GICOM Cameroon national congress</span>
+                </li>
+                <li class="timeline__item timeline__item--award">
+                  <span class="timeline__year">2023</span>
+                  <span class="timeline__what">MTN Cameroon Hackathon — startup track</span>
+                </li>
+                <li class="timeline__item timeline__item--award">
+                  <span class="timeline__year">2022</span>
+                  <span class="timeline__what">MTN Cameroon Hackathon — Mobile Money</span>
+                </li>
+                <li class="timeline__item">
+                  <span class="timeline__year">2021</span>
+                  <span class="timeline__what">Founded Zepythagore</span>
+                </li>
+              </ol>
+            </section>
           </div>
         </section>
 
+        <div class="story-step story-step--3" aria-hidden="true"></div>
+
+        <!-- ============================= CONTACT ============================= -->
+        <section class="section section--contact" id="contact" data-section>
+          <div class="progress-wrapper" aria-hidden="true">
+            <div class="progress-bar progress-bar--green"></div>
+          </div>
+
+          <div class="section-intro-wrapper">
+            <header class="section-heading-block">
+              <p class="section-eyebrow">03 — Contact</p>
+              <h2 class="section-title"><span class="section-title-text">Contact</span></h2>
+            </header>
+            <p class="section-sub">
+              Have a product to build, a system to untangle, or a team that needs
+              technical leadership? Tell me what you are working on.
+            </p>
+          </div>
+
+          <div class="section-detail-wrapper">
+            <ul class="contacts">
+              <li class="contact">
+                <span class="contact__label">Email</span>
+                <a class="contact__value" href="mailto:gillemomeni@gmail.com">
+                  gillemomeni@gmail.com
+                </a>
+              </li>
+              <li class="contact">
+                <span class="contact__label">GitHub</span>
+                <a class="contact__value" href="https://github.com/menoc61" rel="noopener me">
+                  github.com/menoc61
+                </a>
+              </li>
+              <li class="contact">
+                <span class="contact__label">LinkedIn</span>
+                <a
+                  class="contact__value"
+                  href="https://www.linkedin.com/in/gille-momeni-9087121bb/"
+                  rel="noopener me"
+                >
+                  in/gille-momeni
+                </a>
+              </li>
+              <li class="contact">
+                <span class="contact__label">X</span>
+                <a class="contact__value" href="https://twitter.com/GilleMomeni" rel="noopener me">
+                  @GilleMomeni
+                </a>
+              </li>
+              <li class="contact">
+                <span class="contact__label">Telegram</span>
+                <a class="contact__value" href="https://t.me/gillemomeni" rel="noopener me">
+                  t.me/gillemomeni
+                </a>
+              </li>
+              <li class="contact">
+                <span class="contact__label">WhatsApp</span>
+                <a class="contact__value" href="https://wa.me/79011805350" rel="noopener">
+                  +237 693 972 665
+                </a>
+              </li>
+            </ul>
+
+            <div class="interests" aria-label="What I work on and what I do for fun">
+              <ul class="interests__track">
+                <li class="interests__item">UX / UI design</li>
+                <li class="interests__item">Full-stack development</li>
+                <li class="interests__item">Mobile development</li>
+                <li class="interests__item">Digital consulting</li>
+                <li class="interests__item">AI solutions</li>
+                <li class="interests__item">New businesses</li>
+                <li class="interests__item">Startups</li>
+                <li class="interests__item">Calisthenics</li>
+                <li class="interests__item">Cooking</li>
+                <li class="interests__item">Gaming</li>
+              </ul>
+            </div>
+
+            <p class="contact-cta">
+              <a class="button button--solid button--large" href="mailto:gillemomeni@gmail.com">
+                Let's build something
+              </a>
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer" data-scene-preloader-scroll>
+      <div class="site-footer__inner">
+        <p class="site-footer__line">
+          <strong>Gilles Momeni</strong> — software engineer, CTO at UHCx, founder
+          of Zepythagore.
+        </p>
+        <p class="site-footer__line site-footer__line--muted">
+          Built with Three.js, GSAP and Vite. Code licensed GNU GPL v3.
+        </p>
+        <p class="site-footer__line site-footer__line--muted">
+          WebGL model: “Head of David but with hay” — personal use only, not for
+          commercial use. Typefaces are open-source and self-hosted.
+        </p>
+        <div class="site-footer__actions">
+          <button
+            type="button"
+            class="scene-preloader__trigger-btn"
+            data-scene-preloader-trigger
+          >
+            Replay preloader
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Custom animated preloader. Hidden by default; mounted by Experience on
+         load and optionally on scroll / trigger. See Experience/ScenePreloader.js. -->
+    <div
+      class="scene-preloader"
+      id="scene-preloader"
+      role="status"
+      aria-live="polite"
+      aria-hidden="true"
+    >
+      <div class="scene-preloader__stage">
+        <div class="scene-preloader__spinner" aria-hidden="true">
+          <span class="scene-preloader__ring scene-preloader__ring--a"></span>
+          <span class="scene-preloader__ring scene-preloader__ring--b"></span>
+        </div>
+        <p class="scene-preloader__label">
+          <span class="scene-preloader__title">Loading the room</span>
+        </p>
+        <div class="scene-preloader__progress" aria-hidden="true">
+          <span class="scene-preloader__bar-fill"></span>
+        </div>
+        <p class="scene-preloader__hint">
+          This only clears once the 3D model is fully loaded.
+        </p>
+        <div class="scene-preloader__trigger">
+          <button
+            type="button"
+            class="scene-preloader__trigger-btn"
+            id="scene-preloader-trigger"
+            data-scene-preloader-trigger-btn
+          >
+            Replay preloader
+          </button>
+        </div>
       </div>
     </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>

@@ -1,408 +1,306 @@
-import { EventEmitter } from "events";
-import Experience from "./Experience.js";
 import GSAP from "gsap";
-import convert from "./Utils/covertDivsToSpans.js";
 
-export default class Preloader extends EventEmitter {
-    constructor() {
-        super();
-        this.experience = new Experience();
-        this.scene = this.experience.scene;
-        this.sizes = this.experience.sizes;
-        this.resources = this.experience.resources;
-        this.camera = this.experience.camera;
-        this.world = this.experience.world;
-        this.device = this.sizes.device;
+import { dom } from "./Utils/dom.js";
+import splitTextToSpans from "./Utils/splitTextToSpans.js";
+import { INTRO } from "./Config/scene.config.js";
+import { INTRO_REVEAL, INTRO_CHAIR_SPIN } from "./Config/roomParts.js";
 
-        this.sizes.on("switchdevice", (device) => {
-            this.device = device;
-        });
+/**
+ * How long we wait for the reader to make an intentional gesture before starting
+ * anyway.
+ *
+ * Kept deliberately short. The hero heading is the page's LCP element and its
+ * characters are still translated off-screen behind this gate, so a long wait
+ * costs real Core Web Vitals. Three seconds is enough for the "scroll to begin"
+ * moment to register without making a first-time visitor wait for the content.
+ */
+const INTENT_TIMEOUT = 3000;
 
-        this.world.on("worldready", () => {
-            this.setAssets();
-            this.playIntro();
-        });
+/**
+ * The intro sequence.
+ *
+ * Two things changed for reasons that matter.
+ *
+ * 1. It always finishes. The original armed `wheel` / `touchstart` listeners and
+ *    advanced only on a downward gesture — nothing else could move it forward. A
+ *    reader who did not scroll, a trackpad still in inertia, or a keyboard-only
+ *    user sat on the "Welcome to my portfolio!" card with the hero name still
+ *    hidden behind `translateY(100%)`. The gate now opens on wheel, touch, key or
+ *    click — or after a timeout.
+ *
+ * 2. It degrades in tiers. Under `prefers-reduced-motion: reduce` there is no cube
+ *    flight, no camera move and no per-character rise: the curtain is removed and
+ *    the scene is placed in its final pose.
+ *
+ * It also animates explicit element arrays rather than selector strings, so a
+ * missing element can never silently widen the selection to the whole page.
+ */
+export default class Preloader {
+    constructor({ sizes, camera, room }) {
+        this.sizes = sizes;
+        this.camera = camera;
+        this.room = room;
+
+        this.root = dom.preloader;
+        this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        this.intentTimeout = null;
+
+        this.prepareText();
     }
 
-    setAssets() {
-        convert(document.querySelector(".intro-text"));
-        convert(document.querySelector(".hero-main-title"));
-        convert(document.querySelector(".hero-main-description"));
-        convert(document.querySelector(".hero-second-subheading"));
-        convert(document.querySelector(".second-sub"));
+    /** Split the hero type into per-character spans (accessibly — see splitTextToSpans). */
+    prepareText() {
+        this.splits = {
+            intro: splitTextToSpans(dom.introText),
+            title: splitTextToSpans(dom.heroTitle),
+            description: splitTextToSpans(dom.heroDescription),
+            firstSub: splitTextToSpans(dom.heroFirstSub),
+            secondSub: splitTextToSpans(dom.heroSecondSub),
+        };
+    }
 
-        this.room = this.experience.world.room.actualRoom;
-        this.roomChildren = this.experience.world.room.roomChildren;
+    charsOf(...keys) {
+        return keys
+            .map((key) => this.splits[key])
+            .filter(Boolean)
+            .flatMap((split) => split.chars);
+    }
+
+    get allChars() {
+        return this.charsOf("intro", "title", "description", "firstSub", "secondSub");
+    }
+
+    play() {
+        document.documentElement.classList.add("is-intro");
+
+        if (this.reducedMotion.matches) {
+            this.finishWithoutMotion();
+            return Promise.resolve();
+        }
+
+        return this.firstIntro()
+            .then(() => this.waitForIntent())
+            .then(() => this.secondIntro())
+            .catch((error) => {
+                console.warn("[preloader] intro aborted", error);
+            })
+            .finally(() => this.complete());
+    }
+
+    /** Reduced motion: no cube flight, no camera move, no character rise. */
+    finishWithoutMotion() {
+        this.revealAllParts();
+        this.hideCurtain({ immediate: true });
+
+        GSAP.set(this.allChars, { y: 0, yPercent: 0 });
+        if (dom.arrow) {
+            GSAP.set(dom.arrow, { opacity: 1 });
+        }
+        if (dom.toggleBar) {
+            GSAP.set(dom.toggleBar, { opacity: 1 });
+        }
     }
 
     firstIntro() {
         return new Promise((resolve) => {
-            this.timeline = new GSAP.timeline();
-            this.timeline.set(".animatedis", { y: 0, yPercent: 100 });
-            this.timeline.to(".preloader", {
+            const timeline = GSAP.timeline({ onComplete: resolve });
+            const offset = this.sizes.profile.introRoomOffset;
+
+            timeline.set(this.allChars, { y: 0, yPercent: 100 });
+            timeline.to(this.root ?? {}, {
                 opacity: 0,
-                delay: 1,
-                onComplete: () => {
-                    document
-                        .querySelector(".preloader")
-                        .classList.add("hidden");
-                },
+                delay: INTRO.preloaderFadeDelay,
+                onComplete: () => this.hideCurtain(),
             });
-            if (this.device === "desktop") {
-                this.timeline
-                    .to(this.roomChildren.cube.scale, {
-                        x: 1.4,
-                        y: 1.4,
-                        z: 1.4,
-                        ease: "back.out(2.5)",
-                        duration: 0.7,
-                    })
-                    .to(this.room.position, {
-                        x: -1,
-                        ease: "power1.out",
-                        duration: 0.7,
-                    });
-            } else {
-                this.timeline
-                    .to(this.roomChildren.cube.scale, {
-                        x: 1.4,
-                        y: 1.4,
-                        z: 1.4,
-                        ease: "back.out(2.5)",
-                        duration: 0.7,
-                    })
-                    .to(this.room.position, {
-                        z: -1,
-                        ease: "power1.out",
-                        duration: 0.7,
-                    });
-            }
-            this.timeline
-                .to(".intro-text .animatedis", {
-                    yPercent: 0,
-                    stagger: 0.05,
-                    ease: "back.out(1.7)",
-                })
-                .to(
-                    ".arrow-svg-wrapper",
+
+            // The cube grows and the room drifts, behind the curtain fade.
+            if (this.room.parts.cube) {
+                timeline.to(
+                    this.room.parts.cube.scale,
                     {
-                        opacity: 1,
+                        x: INTRO.cubeGrow.to,
+                        y: INTRO.cubeGrow.to,
+                        z: INTRO.cubeGrow.to,
+                        ease: INTRO.cubeGrow.ease,
+                        duration: INTRO.cubeGrow.duration,
                     },
-                    "same"
-                )
-                .to(
-                    ".toggle-bar",
-                    {
-                        opacity: 1,
-                        onComplete: resolve,
-                    },
-                    "same"
+                    0
                 );
+            }
+            timeline.to(
+                this.room.actualRoom.position,
+                {
+                    x: offset.x,
+                    y: offset.y,
+                    z: offset.z,
+                    ease: "power1.out",
+                    duration: INTRO.cubeGrow.duration,
+                },
+                0
+            );
+
+            timeline.to(this.charsOf("intro"), {
+                yPercent: 0,
+                stagger: 0.05,
+                ease: INTRO.charEase,
+            });
+            timeline.to(dom.arrow ?? {}, { opacity: 1 }, "same");
+            timeline.to(dom.toggleBar ?? {}, { opacity: 1 }, "same");
+        });
+    }
+
+    /**
+     * Hold until the reader shows intent. Any of the four gestures opens the gate,
+     * and a timeout guarantees it opens anyway.
+     */
+    waitForIntent() {
+        return new Promise((resolve) => {
+            const events = ["wheel", "touchstart", "keydown", "pointerdown"];
+
+            const open = () => {
+                events.forEach((name) => window.removeEventListener(name, open));
+                window.clearTimeout(this.intentTimeout);
+                this.intentTimeout = null;
+                resolve();
+            };
+
+            events.forEach((name) =>
+                window.addEventListener(name, open, { once: true })
+            );
+            this.intentTimeout = window.setTimeout(open, INTENT_TIMEOUT);
         });
     }
 
     secondIntro() {
-        return new Promise((resolve) => {
-            this.secondTimeline = new GSAP.timeline();
+        const room = this.room.actualRoom;
+        const parts = this.room.parts;
+        const profile = this.sizes.profile;
 
-            this.secondTimeline
+        return new Promise((resolve) => {
+            const timeline = GSAP.timeline({ onComplete: resolve });
+
+            timeline
+                .to(this.allChars, {
+                    yPercent: 100,
+                    stagger: 0.05,
+                    ease: "back.in(1.7)",
+                })
+                .to(dom.arrow ?? {}, { opacity: 0 }, "fadeout")
                 .to(
-                    ".intro-text .animatedis",
-                    {
-                        yPercent: 100,
-                        stagger: 0.05,
-                        ease: "back.in(1.7)",
-                    },
-                    "fadeout"
-                )
-                .to(
-                    ".arrow-svg-wrapper",
-                    {
-                        opacity: 0,
-                    },
-                    "fadeout"
-                )
-                .to(
-                    this.room.position,
-                    {
-                        x: 0,
-                        y: 0,
-                        z: 0,
-                        ease: "power1.out",
-                    },
+                    room.position,
+                    { x: 0, y: 0, z: 0, ease: "power1.out", duration: 0.7 },
                     "same"
                 )
+                .to(parts.cube.rotation, { y: INTRO.cubeFinalSpin }, "same")
                 .to(
-                    this.roomChildren.cube.rotation,
+                    parts.cube.scale,
                     {
-                        y: 2 * Math.PI + Math.PI / 4,
-                    },
-                    "same"
-                )
-                .to(
-                    this.roomChildren.cube.scale,
-                    {
-                        x: 10,
-                        y: 10,
-                        z: 10,
+                        x: INTRO.cubeFinalScale,
+                        y: INTRO.cubeFinalScale,
+                        z: INTRO.cubeFinalScale,
                     },
                     "same"
                 )
                 .to(
                     this.camera.orthographicCamera.position,
-                    {
-                        y: 6.5,
-                    },
+                    { y: profile.cameraHome.y },
                     "same"
                 )
-                .to(
-                    this.roomChildren.cube.position,
-                    {
-                        x: 0.638711,
-                        y: 8.5618,
-                        z: 1.3243,
-                    },
-                    "same"
-                )
-                .set(this.roomChildren.body.scale, {
-                    x: 1,
-                    y: 1,
-                    z: 1,
-                })
-                .to(
-                    this.roomChildren.cube.scale,
-                    {
-                        x: 0,
-                        y: 0,
-                        z: 0,
-                        duration: 1,
-                    },
-                    "introtext"
-                )
-                .to(
-                    ".hero-main-title .animatedis",
-                    {
-                        yPercent: 0,
-                        stagger: 0.07,
-                        ease: "back.out(1.7)",
-                    },
-                    "introtext"
-                )
-                .to(
-                    ".hero-main-description .animatedis",
-                    {
-                        yPercent: 0,
-                        stagger: 0.07,
-                        ease: "back.out(1.7)",
-                    },
-                    "introtext"
-                )
-                .to(
-                    ".first-sub .animatedis",
-                    {
-                        yPercent: 0,
-                        stagger: 0.07,
-                        ease: "back.out(1.7)",
-                    },
-                    "introtext"
-                )
-                .to(
-                    ".second-sub .animatedis",
-                    {
-                        yPercent: 0,
-                        stagger: 0.07,
-                        ease: "back.out(1.7)",
-                    },
-                    "introtext"
-                )
-                .to(
-                    this.roomChildren.aquarium.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    ">-0.5"
-                )
-                .to(
-                    this.roomChildren.clock.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    ">-0.4"
-                )
-                .to(
-                    this.roomChildren.shelves.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    ">-0.3"
-                )
-                .to(
-                    this.roomChildren.floor_items.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    ">-0.2"
-                )
-                .to(
-                    this.roomChildren.desks.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    ">-0.1"
-                )
-                .to(
-                    this.roomChildren.table_stuff.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    ">-0.1"
-                )
-                .to(this.roomChildren.computer.scale, {
-                    x: 1,
-                    y: 1,
-                    z: 1,
-                    ease: "back.out(2.2)",
-                    duration: 0.5,
-                })
-                .set(this.roomChildren.mini_floor.scale, {
-                    x: 1,
-                    y: 1,
-                    z: 1,
-                })
-                .to(
-                    this.roomChildren.chair.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    "chair"
-                )
-                .to(
-                    this.roomChildren.fish.scale,
-                    {
-                        x: 1,
-                        y: 1,
-                        z: 1,
-                        ease: "back.out(2.2)",
-                        duration: 0.5,
-                    },
-                    "chair"
-                )
-                .to(
-                    this.roomChildren.chair.rotation,
-                    {
-                        y: 4 * Math.PI + Math.PI / 4,
-                        ease: "power2.out",
-                        duration: 1,
-                    },
-                    "chair"
-                )
-                .to(".arrow-svg-wrapper", {
-                    opacity: 1,
-                    onComplete: resolve,
+                .to(parts.cube.position, { ...INTRO.cubeFinalPosition }, "same")
+                .set(parts.body.scale, {
+                    x: INTRO.bodyScale,
+                    y: INTRO.bodyScale,
+                    z: INTRO.bodyScale,
                 });
+
+            // The cube is flung away and the room lands, revealing the hero type.
+            timeline.to(parts.cube.scale, { x: 0, y: 0, z: 0, duration: 1 }, "introtext");
+            timeline.to(
+                this.charsOf("title", "description", "firstSub", "secondSub"),
+                {
+                    yPercent: 0,
+                    stagger: INTRO.charStagger,
+                    ease: INTRO.charEase,
+                },
+                "introtext"
+            );
+
+            this.appendPartReveal(timeline);
+
+            timeline.to(dom.arrow ?? {}, { opacity: 1 });
         });
     }
 
-    onScroll(e) {
-        if (e.deltaY > 0) {
-            this.removeEventListeners();
-            this.playSecondIntro();
+    /** Every diorama part pops in, staggered, ending with the chair spin. */
+    appendPartReveal(timeline) {
+        const parts = this.room.parts;
+
+        for (const entry of INTRO_REVEAL) {
+            const part = parts[entry.part];
+            if (!part) {
+                continue;
+            }
+            const vars = {
+                x: 1,
+                y: 1,
+                z: 1,
+                ease: entry.ease,
+                duration: entry.duration,
+            };
+            if (entry.set) {
+                timeline.set(part.scale, vars);
+            } else {
+                timeline.to(part.scale, vars, entry.position);
+            }
+        }
+
+        if (parts.chair) {
+            timeline.to(
+                parts.chair.rotation,
+                {
+                    y: INTRO_CHAIR_SPIN.rotationY,
+                    ease: INTRO_CHAIR_SPIN.ease,
+                    duration: INTRO_CHAIR_SPIN.duration,
+                },
+                INTRO_CHAIR_SPIN.position
+            );
         }
     }
 
-    onTouch(e) {
-        this.initalY = e.touches[0].clientY;
-    }
-
-    onTouchMove(e) {
-        let currentY = e.touches[0].clientY;
-        let difference = this.initalY - currentY;
-        if (difference > 0) {
-            console.log("swipped up");
-            this.removeEventListeners();
-            this.playSecondIntro();
-        }
-        this.intialY = null;
-    }
-
-    removeEventListeners() {
-        window.removeEventListener("wheel", this.scrollOnceEvent);
-        window.removeEventListener("touchstart", this.touchStart);
-        window.removeEventListener("touchmove", this.touchMove);
-    }
-
-    async playIntro() {
-        this.scaleFlag = true;
-        await this.firstIntro();
-        this.moveFlag = true;
-        this.scrollOnceEvent = this.onScroll.bind(this);
-        this.touchStart = this.onTouch.bind(this);
-        this.touchMove = this.onTouchMove.bind(this);
-        window.addEventListener("wheel", this.scrollOnceEvent);
-        window.addEventListener("touchstart", this.touchStart);
-        window.addEventListener("touchmove", this.touchMove);
-    }
-    async playSecondIntro() {
-        this.moveFlag = false;
-        await this.secondIntro();
-        this.scaleFlag = false;
-        this.emit("enablecontrols");
-    }
-
-    move() {
-        if (this.device === "desktop") {
-            this.room.position.set(-1, 0, 0);
-        } else {
-            this.room.position.set(0, 0, -1);
+    revealAllParts() {
+        for (const part of Object.values(this.room.parts)) {
+            part.scale?.setScalar(1);
         }
     }
 
-    scale() {
-        this.roomChildren.rectLight.width = 0;
-        this.roomChildren.rectLight.height = 0;
-
-        if (this.device === "desktop") {
-            this.room.scale.set(0.11, 0.11, 0.11);
-        } else {
-            this.room.scale.set(0.07, 0.07, 0.07);
+    hideCurtain({ immediate = false } = {}) {
+        if (!this.root) {
+            return;
+        }
+        this.root.classList.add("is-hidden");
+        if (immediate) {
+            this.root.style.display = "none";
         }
     }
 
-    update() {
-        if (this.moveFlag) {
-            this.move();
-        }
+    /** Always reached: releases the scroll lock and reveals the page. */
+    complete() {
+        document.documentElement.classList.remove("is-intro");
+        window.clearTimeout(this.intentTimeout);
+        this.hideCurtain();
+        this.hideArrow();
+    }
 
-        if (this.scaleFlag) {
-            this.scale();
-        }
+    /**
+     * The arrow is a "scroll to continue" affordance. Once the intro is over that
+     * is a lie, and it overlaps the first section on small screens.
+     */
+    hideArrow() {
+        dom.arrow?.classList.add("is-hidden");
+    }
+
+    destroy() {
+        window.clearTimeout(this.intentTimeout);
+        document.documentElement.classList.remove("is-intro");
     }
 }

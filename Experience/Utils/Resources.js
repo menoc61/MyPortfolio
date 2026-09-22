@@ -1,71 +1,173 @@
 import * as THREE from "three";
-
-import { EventEmitter } from "events";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import Experience from "../Experience.js";
 
-export default class Resources extends EventEmitter {
-    constructor(assets) {
+import EventBus from "./EventBus.js";
+import { EVENTS } from "./EVENTS.js";
+
+/**
+ * Asset loading.
+ *
+ * Changed from the original:
+ *  - returns a Promise instead of counting `loaded === queue`, which had no
+ *    failure branch at all: one failed request left the preloader spinning
+ *    forever behind an opaque full-screen overlay, hiding the whole site.
+ *  - assets declare whether they are `critical` (see Utils/assets.js).
+ *  - non-critical failures are reported but do not reject the boot.
+ *  - the Draco decoder is three's own bundled copy. `DRACOLoader` resolves its
+ *    decoder relative to its module URL, so Vite emits it as a hashed, immutable
+ *    asset. Pass an explicit `dracoPath` only if you need to self-host it.
+ */
+export default class Resources extends EventBus {
+    constructor(assets, { dracoPath = null } = {}) {
         super();
-        this.experience = new Experience();
-        this.renderer = this.experience.renderer;
-
         this.assets = assets;
 
         this.items = {};
-        this.queue = this.assets.length;
-        this.loaded = 0;
+        this.failed = [];
 
-        this.setLoaders();
-        this.startLoading();
+        this.setLoaders(dracoPath);
     }
 
-    setLoaders() {
-        this.loaders = {};
-        this.loaders.gltfLoader = new GLTFLoader();
-        this.loaders.dracoLoader = new DRACOLoader();
-        this.loaders.dracoLoader.setDecoderPath("/draco/");
-        this.loaders.gltfLoader.setDRACOLoader(this.loaders.dracoLoader);
+    setLoaders(dracoPath) {
+        this.dracoLoader = new DRACOLoader();
+        if (dracoPath) {
+            this.dracoLoader.setDecoderPath(dracoPath);
+        }
+
+        this.gltfLoader = new GLTFLoader();
+        this.gltfLoader.setDRACOLoader(this.dracoLoader);
     }
-    startLoading() {
+
+    /**
+     * Resolves once every CRITICAL asset is in.
+     *
+     * Optional assets (`critical: false`) are started but deliberately NOT
+     * awaited: they must never be able to hold the page behind the curtain. The
+     * original counted every asset in one queue, so a blocked video took the whole
+     * site down with it — and this rewrite reintroduced that bug for one build
+     * until a headless test caught it. Do not "simplify" this back to one Promise.all.
+     */
+    load() {
+        const critical = [];
+        const optional = [];
+
         for (const asset of this.assets) {
-            if (asset.type === "glbModel") {
-                this.loaders.gltfLoader.load(asset.path, (file) => {
-                    this.singleAssetLoaded(asset, file);
-                });
-            } else if (asset.type === "videoTexture") {
-                this.video = {};
-                this.videoTexture = {};
-
-                this.video[asset.name] = document.createElement("video");
-                this.video[asset.name].src = asset.path;
-                this.video[asset.name].muted = true;
-                this.video[asset.name].playsInline = true;
-                this.video[asset.name].autoplay = true;
-                this.video[asset.name].loop = true;
-                this.video[asset.name].play();
-
-                this.videoTexture[asset.name] = new THREE.VideoTexture(
-                    this.video[asset.name]
-                );
-                // this.videoTexture[asset.name].flipY = false;
-                this.videoTexture[asset.name].minFilter = THREE.NearestFilter;
-                this.videoTexture[asset.name].magFilter = THREE.NearestFilter;
-                this.videoTexture[asset.name].generateMipmaps = false;
-                this.videoTexture[asset.name].encoding = THREE.sRGBEncoding;
-
-                this.singleAssetLoaded(asset, this.videoTexture[asset.name]);
-            }
+            (asset.critical === false ? optional : critical).push(asset);
         }
+
+        for (const asset of optional) {
+            this.loadOne(asset).catch((error) => {
+                // Already recorded by recordFailure; swallow so it stays optional.
+                void error;
+            });
+        }
+
+        return Promise.all(critical.map((asset) => this.loadOne(asset))).then(
+            () => this.items
+        );
     }
 
-    singleAssetLoaded(asset, file) {
-        this.items[asset.name] = file;
-        this.loaded++;
-
-        if (this.loaded === this.queue) {
-            this.emit("ready");
+    loadOne(asset) {
+        if (asset.type === "glbModel") {
+            return this.loadModel(asset);
         }
+        if (asset.type === "videoTexture") {
+            return this.loadVideo(asset);
+        }
+        return Promise.resolve(null);
+    }
+
+    loadModel(asset) {
+        return new Promise((resolve, reject) => {
+            this.gltfLoader.load(
+                asset.path,
+                (file) => {
+                    this.items[asset.name] = file;
+                    this.emit(EVENTS.RESOURCES_PROGRESS, asset.name);
+                    resolve(file);
+                },
+                // Byte progress. The GLB is the only critical asset, so its
+                // bytes ARE the loading progress — ScenePreloader drives its
+                // bar from this (mapped to 0–90%; WORLD_READY owns the rest).
+                (event) => {
+                    this.emit(EVENTS.RESOURCES_PROGRESS, asset.name, {
+                        loaded: Number(event?.loaded ?? 0),
+                        total: Number(event?.total ?? 0),
+                    });
+                },
+                (error) => {
+                    this.recordFailure(asset, error);
+                    if (asset.critical === false) {
+                        resolve(null);
+                        return;
+                    }
+                    reject(error);
+                }
+            );
+        });
+    }
+
+    /**
+     * Video textures are best-effort. `play()` is explicitly caught: browsers may
+     * reject autoplay even for muted inline video, and an unhandled rejection
+     * there was previously invisible.
+     */
+    loadVideo(asset) {
+        return new Promise((resolve) => {
+            const video = document.createElement("video");
+            video.src = asset.path;
+            video.muted = true;
+            video.playsInline = true;
+            video.autoplay = true;
+            video.loop = true;
+            video.preload = "auto";
+
+            const settle = (ok, error) => {
+                if (!ok) {
+                    this.recordFailure(asset, error);
+                    resolve(null);
+                    return;
+                }
+
+                const texture = new THREE.VideoTexture(video);
+                texture.minFilter = THREE.NearestFilter;
+                texture.magFilter = THREE.NearestFilter;
+                texture.generateMipmaps = false;
+                texture.colorSpace = THREE.SRGBColorSpace;
+
+                this.items[asset.name] = texture;
+                this.emit(EVENTS.RESOURCES_PROGRESS, asset.name);
+                resolve(texture);
+            };
+
+            video.addEventListener(
+                "loadeddata",
+                () => {
+                    video.play().then(
+                        () => settle(true),
+                        (error) => settle(false, error)
+                    );
+                },
+                { once: true }
+            );
+            video.addEventListener("error", (error) => settle(false, error), {
+                once: true,
+            });
+
+            video.load();
+        });
+    }
+
+    recordFailure(asset, error) {
+        this.failed.push({ name: asset.name, error });
+        console.warn(`[resources] failed to load "${asset.name}"`, error);
+        this.emit(EVENTS.RESOURCES_ERROR, { asset, error });
+    }
+
+    destroy() {
+        this.dracoLoader?.dispose();
+        this.items = {};
+        this.clear();
     }
 }

@@ -4,58 +4,178 @@ import Sizes from "./Utils/Sizes.js";
 import Time from "./Utils/Time.js";
 import Resources from "./Utils/Resources.js";
 import assets from "./Utils/assets.js";
+import { dom, supportsWebGL } from "./Utils/dom.js";
+import { EVENTS } from "./Utils/EVENTS.js";
 
+import Boot from "./Boot.js";
 import Camera from "./Camera.js";
-import Theme from "./Theme.js";
 import Renderer from "./Renderer.js";
+import Theme from "./Theme.js";
 import Preloader from "./Preloader.js";
+import ScenePreloader from "./ScenePreloader.js";
 
 import World from "./World/World.js";
 import Controls from "./World/Controls.js";
 
+/**
+ * The composition root.
+ *
+ * This is now the ONLY module that knows the construction order. Previously every
+ * module did `this.experience = new Experience()` and then reached four levels
+ * deep for a sibling (`experience.world.room.roomChildren.cube`), which meant no
+ * module could be understood, or tested, on its own. Now dependencies arrive as
+ * constructor arguments.
+ *
+ * It also owns the boot lifecycle: `Boot` settles exactly once, whether the scene
+ * works or not, so the page can never be left behind an opaque curtain.
+ */
 export default class Experience {
     static instance;
-    constructor(canvas) {
+
+    constructor(canvas = dom.canvas) {
         if (Experience.instance) {
             return Experience.instance;
         }
         Experience.instance = this;
+
         this.canvas = canvas;
         this.scene = new THREE.Scene();
         this.time = new Time();
         this.sizes = new Sizes();
-        this.camera = new Camera();
-        this.renderer = new Renderer();
-        this.resources = new Resources(assets);
+        this.boot = new Boot();
+
+        // Theme is pure DOM. It must exist even when WebGL does not, so the
+        // reader can still switch the page to dark.
         this.theme = new Theme();
-        this.world = new World();
-        this.preloader = new Preloader();
 
-        this.preloader.on("enablecontrols", () => {
-            this.controls = new Controls();
+        // The scene preloader is pure DOM too, so it is created BEFORE any
+        // WebGL check: on the earliest boot failure it hides itself
+        // (ScenePreloader.forceHide) and the reader keeps the readable page.
+        // Its gate clears only on finish() — i.e. only when the 3D model is
+        // fully loaded and mounted in the scene.
+        this.scenePreloader = new ScenePreloader({ boot: this.boot });
+
+        this.sizes.on(EVENTS.SIZES_RESIZE, () => this.resize());
+        this.time.on(EVENTS.TIME_TICK, () => this.update());
+
+        if (!this.canvas) {
+            this.boot.fail("no-canvas");
+            return;
+        }
+        if (!supportsWebGL()) {
+            this.boot.fail("no-webgl");
+            return;
+        }
+
+        try {
+            this.camera = new Camera({ scene: this.scene, sizes: this.sizes });
+            this.renderer = new Renderer({
+                canvas: this.canvas,
+                scene: this.scene,
+                sizes: this.sizes,
+                camera: this.camera,
+            });
+        } catch (error) {
+            this.boot.fail("renderer-init", error);
+            return;
+        }
+
+        this.resources = new Resources(assets);
+        this.resources.on(EVENTS.RESOURCES_PROGRESS, (name, stats) => {
+            this.scenePreloader?.onResourceProgress(name, stats);
+        });
+        this.resources
+            .load()
+            .then(() => this.createWorld())
+            .catch((error) => this.boot.fail("assets", error));
+    }
+
+    createWorld() {
+        this.world = new World({
+            scene: this.scene,
+            sizes: this.sizes,
+            camera: this.camera,
+            resources: this.resources,
+            theme: this.theme,
         });
 
-        this.sizes.on("resize", () => {
-            this.resize();
+        this.world.on(EVENTS.WORLD_READY, () => {
+            // The scene is built and rendering — that is what "ready" means.
+            // The intro is an enhancement and must NOT be able to trip the
+            // watchdog: it deliberately waits for the reader's first gesture, so
+            // finishing it is not a measure of whether the app works.
+            this.boot.ready();
+
+            // The 3D model is fully loaded and mounted — ONLY NOW may the
+            // scene preloader's gate clear. It runs before startIntro so the
+            // curtain lifts exactly as the first-commit intro begins.
+            this.scenePreloader.finish();
+            this.startIntro();
         });
-        this.time.on("update", () => {
-            this.update();
-        });
+    }
+
+    startIntro() {
+        try {
+            this.preloader = new Preloader({
+                sizes: this.sizes,
+                camera: this.camera,
+                room: this.world.room,
+            });
+        } catch (error) {
+            console.warn("[experience] intro unavailable", error);
+            this.releaseScrollLock();
+            return;
+        }
+
+        this.preloader
+            .play()
+            .then(() => this.enableControls())
+            .catch((error) => {
+                console.warn("[experience] intro aborted", error);
+                this.releaseScrollLock();
+            });
+    }
+
+    /** Belt-and-braces: nothing may leave the reader unable to scroll. */
+    releaseScrollLock() {
+        document.documentElement.classList.remove("is-intro", "is-loading");
+    }
+
+    enableControls() {
+        try {
+            this.controls = new Controls({
+                sizes: this.sizes,
+                camera: this.camera,
+                room: this.world.room,
+                floor: this.world.floor,
+            });
+        } catch (error) {
+            // Scroll choreography is an enhancement; the page works without it.
+            console.warn("[experience] scroll choreography unavailable", error);
+        }
     }
 
     resize() {
-        this.camera.resize();
-        this.world.resize();
-        this.renderer.resize();
+        this.camera?.resize();
+        this.renderer?.resize();
+        this.world?.resize();
     }
 
     update() {
-        this.preloader.update();
-        this.camera.update();
-        this.world.update();
-        this.renderer.update();
-        if (this.controls) {
-            this.controls.update();
-        }
+        this.world?.update({ delta: this.time.delta });
+        this.renderer?.update();
+    }
+
+    destroy() {
+        this.controls?.destroy();
+        this.preloader?.destroy();
+        this.scenePreloader?.destroy();
+        this.world?.destroy();
+        this.renderer?.destroy();
+        this.time.clear();
+        this.sizes.clear();
+        this.boot.clear();
+        Experience.instance = null;
     }
 }
+

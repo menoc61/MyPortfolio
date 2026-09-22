@@ -1,60 +1,44 @@
-import * as THREE from "three";
-import Experience from "../Experience.js";
+import EventBus from "../Utils/EventBus.js";
+import { EVENTS } from "../Utils/EVENTS.js";
 
 import Room from "./Room.js";
 import Floor from "./Floor.js";
-import Controls from "./Controls.js";
 import Environment from "./Environment.js";
-import { EventEmitter } from "events";
 
-export default class World extends EventEmitter {
-    constructor() {
+/**
+ * The 3D scene graph.
+ *
+ * Changed from the original: it no longer listens for a stringly-typed resource
+ * event and no longer fetches its own dependencies through the `Experience`
+ * singleton. Everything arrives as an argument.
+ */
+export default class World extends EventBus {
+    constructor({ scene, sizes, camera, resources, theme }) {
         super();
-        this.experience = new Experience();
-        this.sizes = this.experience.sizes;
-        this.scene = this.experience.scene;
-        this.canvas = this.experience.canvas;
-        this.camera = this.experience.camera;
-        this.resources = this.experience.resources;
-        this.theme = this.experience.theme;
 
-        this.resources.on("ready", () => {
-            this.environment = new Environment();
-            this.floor = new Floor();
-            this.room = new Room();
-            // this.controls = new Controls();
-            this.emit("worldready");
-        });
+        this.scene = scene;
+        this.environment = new Environment({ scene, sizes, theme });
+        this.floor = new Floor({ scene });
+        this.room = new Room({ scene, sizes, resources });
 
-        this.theme.on("switch", (theme) => {
-            this.switchTheme(theme);
-        });
-
-        // this.sizes.on("switchdevice", (device) => {
-        //     this.switchDevice(device);
-        // });
+        // Emitted on the microtask queue so listeners attached immediately after
+        // `new World()` still receive it — a constructor cannot know its
+        // subscribers, and the original relied on a later, unrelated event firing.
+        queueMicrotask(() => this.emit(EVENTS.WORLD_READY, this));
     }
 
-    switchTheme(theme) {
-        if (this.environment) {
-            this.environment.switchTheme(theme);
-        }
+    resize() {
+        // Nothing in the scene is layout-dependent; the camera owns that.
     }
 
-    // switchDevice(device) {
-    //     if (this.controls) {
-    //         this.controls.switchDevice(device);
-    //     }
-    // }
+    update({ delta }) {
+        this.room?.update({ delta });
+    }
 
-    resize() {}
-
-    update() {
-        if (this.room) {
-            this.room.update();
-        }
-        if (this.controls) {
-            this.controls.update();
-        }
+    destroy() {
+        this.environment?.destroy();
+        this.floor?.destroy();
+        this.room?.destroy();
+        this.clear();
     }
 }

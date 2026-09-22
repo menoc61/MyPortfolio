@@ -1,0 +1,30 @@
+.site-footer {
+    position: relative;
+    z-index: 20;
+    padding: var(--space-2xl) var(--section-padding-inline);
+    background-color: var(--paper);
+    border-top: var(--border-hairline);
+}
+
+.site-footer__inner {
+    max-width: var(--shell-max);
+    margin-inline: auto;
+    display: grid;
+    gap: var(--space-2xs);
+}
+
+.site-footer__line {
+    font-size: var(--step--1);
+    color: var(--ink);
+}
+
+.site-footer__line--muted {
+    color: var(--ink-soft);
+    max-width: 70ch;
+}
+
+.site-footer__actions {
+    margin-top: var(--space-m);
+    display: flex;
+    justify-content: flex-start;
+}

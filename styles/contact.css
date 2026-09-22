@@ -1,0 +1,96 @@
+/* ------------------------------------------------------------- contacts -- */
+
+.contacts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--space-s);
+}
+
+.contact {
+    display: grid;
+    gap: 0.15rem;
+    padding: var(--space-m);
+    background-color: var(--paper-raised);
+    border: var(--border-hairline);
+    border-radius: var(--radius-s);
+    transition:
+        border-color var(--dur-base) var(--ease-standard),
+        transform var(--dur-base) var(--ease-out);
+}
+
+.contact:hover,
+.contact:focus-within {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--section-contact) 45%, transparent);
+}
+
+.contact__label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.contact__value {
+    font-size: var(--step-0);
+    font-weight: 500;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    background-image: linear-gradient(var(--section-contact), var(--section-contact));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    transition: background-size var(--dur-base) var(--ease-out);
+}
+
+.contact__value:hover,
+.contact__value:focus-visible {
+    background-size: 100% 2px;
+}
+
+/* ------------------------------------------------------------ interests -- */
+
+/*
+ * Deliberate decision: this is a STATIC wrapped list, not an auto-scrolling
+ * marquee. An infinite marquee is a Tier 1 motion trigger and, per WCAG 2.2.2
+ * (Level A), any auto-moving content longer than five seconds needs a visible
+ * pause control. A wrapped list conveys exactly the same information with no
+ * motion, no duplicated text for screen readers, and no control to explain.
+ */
+.interests {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: var(--border-hairline);
+}
+
+.interests__track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-s);
+}
+
+.interests__item {
+    padding: 0.3em 0.9em;
+    border: var(--border-hairline);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    transition:
+        color var(--dur-base) var(--ease-standard),
+        border-color var(--dur-base) var(--ease-standard);
+}
+
+.interests__item:hover {
+    color: var(--ink);
+    border-color: var(--section-contact);
+}
+
+.contact-cta {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: var(--border-hairline);
+}

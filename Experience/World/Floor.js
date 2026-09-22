@@ -1,65 +1,77 @@
 import * as THREE from "three";
-import Experience from "../Experience.js";
+import { CIRCLES, PLANE } from "../Config/scene.config.js";
 
+/**
+ * The ground plane and the three section circles.
+ *
+ * The three near-identical `circleFirst/Second/Third` blocks the original repeated
+ * by hand are now a loop over `CIRCLES`, so "how many sections are there" is
+ * answered in one place.
+ *
+ * The circles echo the page sections: each one grows as the reader enters its
+ * section (see World/scrollStory.js).
+ */
 export default class Floor {
-    constructor() {
-        this.experience = new Experience();
-        this.scene = this.experience.scene;
+    constructor({ scene }) {
+        this.scene = scene;
 
         this.setFloor();
         this.setCircles();
     }
 
     setFloor() {
-        this.geometry = new THREE.PlaneGeometry(100, 100);
+        this.geometry = new THREE.PlaneGeometry(PLANE.size, PLANE.size);
         this.material = new THREE.MeshStandardMaterial({
-            color: 0xffe6a2,
+            color: PLANE.color,
             side: THREE.BackSide,
         });
+
         this.plane = new THREE.Mesh(this.geometry, this.material);
-        this.scene.add(this.plane);
         this.plane.rotation.x = Math.PI / 2;
-        this.plane.position.y = -0.3;
+        this.plane.position.y = PLANE.positionY;
         this.plane.receiveShadow = true;
+
+        this.scene.add(this.plane);
     }
 
     setCircles() {
-        const geometry = new THREE.CircleGeometry(5, 64);
-        const material = new THREE.MeshStandardMaterial({ color: 0xe5a1aa });
-        const material2 = new THREE.MeshStandardMaterial({ color: 0x8395cd });
-        const material3 = new THREE.MeshStandardMaterial({ color: 0x7ad0ac });
+        const geometry = new THREE.CircleGeometry(CIRCLES.radius, CIRCLES.segments);
 
-        this.circleFirst = new THREE.Mesh(geometry, material);
-        this.circleSecond = new THREE.Mesh(geometry, material2);
-        this.circleThird = new THREE.Mesh(geometry, material3);
+        this.circles = {};
 
-        this.circleFirst.position.y = -0.29;
+        for (const [key, color] of Object.entries(CIRCLES.colors)) {
+            const material = new THREE.MeshStandardMaterial({ color });
+            const circle = new THREE.Mesh(geometry, material);
 
-        this.circleSecond.position.y = -0.28;
-        this.circleSecond.position.x = 2;
+            circle.position.y = CIRCLES.y[key];
+            circle.rotation.x = -Math.PI / 2;
+            circle.receiveShadow = true;
+            // Hidden by default; the scroll story grows them in.
+            circle.scale.setScalar(0);
 
-        this.circleThird.position.y = -0.27;
+            circle.name = `circle${key[0].toUpperCase()}${key.slice(1)}`;
 
-        this.circleFirst.scale.set(0, 0, 0);
-        this.circleSecond.scale.set(0, 0, 0);
-        this.circleThird.scale.set(0, 0, 0);
+            this.scene.add(circle);
+            this.circles[key] = circle;
+        }
 
-        this.circleFirst.rotation.x =
-            this.circleSecond.rotation.x =
-            this.circleThird.rotation.x =
-                -Math.PI / 2;
+        // Preserve the original public field names (ScrollSequencer resolves
+        // "circle.first" -> this.circleFirst).
+        this.circleFirst = this.circles.first;
+        this.circleSecond = this.circles.second;
+        this.circleThird = this.circles.third;
 
-        this.circleFirst.receiveShadow =
-            this.circleSecond.receiveShadow =
-            this.circleThird.receiveShadow =
-                true;
-
-        this.scene.add(this.circleFirst);
-        this.scene.add(this.circleSecond);
-        this.scene.add(this.circleThird);
+        this.circleSecond.position.x = CIRCLES.secondOffsetX;
     }
 
-    resize() {}
-
-    update() {}
+    destroy() {
+        this.geometry?.dispose();
+        this.material?.dispose();
+        for (const circle of Object.values(this.circles ?? {})) {
+            circle.geometry.dispose();
+            circle.material.dispose();
+            this.scene.remove(circle);
+        }
+        this.scene.remove(this.plane);
+    }
 }

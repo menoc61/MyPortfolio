@@ -1,136 +1,187 @@
 import * as THREE from "three";
-import Experience from "../Experience.js";
-import GSAP from "gsap";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 
+import {
+    ROOM_PARTS,
+    CASTS_SHADOW,
+    AQUARIUM_MATERIAL,
+    MINI_PLATFORM_HOME,
+} from "../Config/roomParts.js";
+import { LIGHTING } from "../Config/scene.config.js";
+import { EVENTS } from "../Utils/EVENTS.js";
+
+/**
+ * The GLB diorama.
+ *
+ * Changed from the original:
+ *  - meshes are found from the `ROOM_PARTS` manifest and exposed as `parts`,
+ *    instead of three files each comparing `child.name` against their own string
+ *    literals. `Controls.js` compared against "Mini_Floor" while the GLB node is
+ *    "Mini Floor" — that animation silently never ran. A missing part now logs.
+ *  - shadow casting is limited to the parts that actually read at this scale.
+ *  - pointer parallax moved to `ScrollSequencer` (it uses one `quickTo` tween
+ *    instead of creating a tween target on every mousemove).
+ */
 export default class Room {
-    constructor() {
-        this.experience = new Experience();
-        this.scene = this.experience.scene;
-        this.resources = this.experience.resources;
-        this.time = this.experience.time;
-        this.room = this.resources.items.room;
-        this.actualRoom = this.room.scene;
-        this.roomChildren = {};
+    constructor({ scene, sizes, resources }) {
+        this.scene = scene;
+        this.sizes = sizes;
+        this.resources = resources;
 
-        this.lerp = {
-            current: 0,
-            target: 0,
-            ease: 0.1,
-        };
+        this.model = resources.items.room;
+        this.actualRoom = this.model?.scene;
+        this.parts = {};
+
+        if (!this.actualRoom) {
+            throw new Error("Room: the room model was not loaded");
+        }
 
         this.setModel();
         this.setAnimation();
-        this.onMouseMove();
     }
 
     setModel() {
-        this.actualRoom.children.forEach((child) => {
-            child.castShadow = true;
-            child.receiveShadow = true;
-
-            if (child instanceof THREE.Group) {
-                child.children.forEach((groupchild) => {
-                    groupchild.castShadow = true;
-                    groupchild.receiveShadow = true;
-                });
+        this.actualRoom.traverse((object) => {
+            if (object.name) {
+                this.actualRoom.userData.byName ??= new Map();
+                this.actualRoom.userData.byName.set(object.name, object);
             }
-
-            // console.log(child);
-
-            if (child.name === "Aquarium") {
-                // console.log(child);
-                child.children[0].material = new THREE.MeshPhysicalMaterial();
-                child.children[0].material.roughness = 0;
-                child.children[0].material.color.set(0x549dd2);
-                child.children[0].material.ior = 3;
-                child.children[0].material.transmission = 1;
-                child.children[0].material.opacity = 1;
-            }
-
-            if (child.name === "Computer") {
-                child.children[1].material = new THREE.MeshBasicMaterial({
-                    map: this.resources.items.screen,
-                });
-            }
-
-            if (child.name === "Mini_Floor") {
-                child.position.x = -0.289521;
-                child.position.z = 8.83572;
-            }
-
-            // if (
-            //     child.name === "Mailbox" ||
-            //     child.name === "Lamp" ||
-            //     child.name === "FloorFirst" ||
-            //     child.name === "FloorSecond" ||
-            //     child.name === "FloorThird" ||
-            //     child.name === "Dirt" ||
-            //     child.name === "Flower1" ||
-            //     child.name === "Flower2"
-            // ) {
-            //     child.scale.set(0, 0, 0);
-            // }
-
-            child.scale.set(0, 0, 0);
-            if (child.name === "Cube") {
-                // child.scale.set(1, 1, 1);
-                child.position.set(0, -1, 0);
-                child.rotation.y = Math.PI / 4;
-            }
-
-            this.roomChildren[child.name.toLowerCase()] = child;
         });
+        const byName = this.actualRoom.userData.byName ?? new Map();
 
-        const width = 0.5;
-        const height = 0.7;
-        const intensity = 1;
+        const castsShadow = new Set(CASTS_SHADOW);
+
+        for (const [key, nodeName] of Object.entries(ROOM_PARTS)) {
+            const node = byName.get(nodeName);
+            if (!node) {
+                console.warn(`[room] manifest lists "${nodeName}" but the GLB has no such node`);
+                continue;
+            }
+
+            node.castShadow = castsShadow.has(key);
+            node.receiveShadow = true;
+
+            this.parts[key] = node;
+        }
+
+        this.applyMaterialTweaks();
+        this.placeParts();
+
+        // Everything starts collapsed; the intro and the scroll story grow it back.
+        for (const part of Object.values(this.parts)) {
+            part.scale.setScalar(0);
+        }
+
+        this.addDeskLight();
+
+        this.actualRoom.scale.setScalar(this.sizes.profile.roomScale);
+        this.scene.add(this.actualRoom);
+
+        // The screen video is an OPTIONAL asset, so it may arrive after the world
+        // is built. When it does, swap it in — otherwise the monitor would keep
+        // its modelled material forever.
+        this.resources.on(EVENTS.RESOURCES_PROGRESS, (name) => {
+            if (name === "screen") {
+                this.mountScreen();
+            }
+        });
+    }
+
+    applyMaterialTweaks() {
+        const aquariumGlass = this.parts.aquarium?.children?.[0];
+        if (aquariumGlass) {
+            const material = new THREE.MeshPhysicalMaterial({
+                roughness: AQUARIUM_MATERIAL.roughness,
+                ior: AQUARIUM_MATERIAL.ior,
+                transmission: AQUARIUM_MATERIAL.transmission,
+                opacity: AQUARIUM_MATERIAL.opacity,
+                transparent: true,
+            });
+            material.color.set(AQUARIUM_MATERIAL.color);
+            aquariumGlass.material = material;
+        }
+
+        this.mountScreen();
+    }
+
+    /**
+     * Put the screen video on the monitor. Called once at build time and again if
+     * the optional video asset turns up later.
+     */
+    mountScreen() {
+        const screen = this.parts.computer?.children?.[1];
+        const screenTexture = this.resources.items.screen;
+        if (!screen || !screenTexture) {
+            return;
+        }
+
+        screen.material?.dispose?.();
+        screen.material = new THREE.MeshBasicMaterial({ map: screenTexture });
+    }
+
+    placeParts() {
+        if (this.parts.cube) {
+            this.parts.cube.position.set(0, -1, 0);
+            this.parts.cube.rotation.y = Math.PI / 4;
+        }
+
+        if (this.parts.miniFloor) {
+            this.parts.miniFloor.position.x = MINI_PLATFORM_HOME.x;
+            this.parts.miniFloor.position.z = MINI_PLATFORM_HOME.z;
+        }
+    }
+
+    /**
+     * The desk lamp is a `RectAreaLight` added at run time. `RectAreaLightUniformsLib`
+     * must have been initialised first — Renderer does that.
+     */
+    addDeskLight() {
+        const { desk } = LIGHTING;
+        const width = this.sizes.profile.rectLight.width;
+        const height = this.sizes.profile.rectLight.height;
+
         const rectLight = new THREE.RectAreaLight(
-            0xffffff,
-            intensity,
+            desk.color,
+            desk.intensity,
             width,
             height
         );
-        rectLight.position.set(7.68244, 7, 0.5);
-        rectLight.rotation.x = -Math.PI / 2;
-        rectLight.rotation.z = Math.PI / 4;
+        rectLight.position.set(desk.position.x, desk.position.y, desk.position.z);
+        rectLight.rotation.x = desk.rotationX;
+        rectLight.rotation.z = desk.rotationZ;
+
         this.actualRoom.add(rectLight);
-
-        this.roomChildren["rectLight"] = rectLight;
-
-        // const rectLightHelper = new RectAreaLightHelper(rectLight);
-        // rectLight.add(rectLightHelper);
-        // console.log(this.room);
-
-        this.scene.add(this.actualRoom);
-        this.actualRoom.scale.set(0.11, 0.11, 0.11);
+        this.parts.rectLight = rectLight;
     }
 
     setAnimation() {
+        if (!this.model.animations?.length) {
+            return;
+        }
         this.mixer = new THREE.AnimationMixer(this.actualRoom);
-        this.swim = this.mixer.clipAction(this.room.animations[0]);
+        this.swim = this.mixer.clipAction(this.model.animations[0]);
         this.swim.play();
     }
 
-    onMouseMove() {
-        window.addEventListener("mousemove", (e) => {
-            this.rotation =
-                ((e.clientX - window.innerWidth / 2) * 2) / window.innerWidth;
-            this.lerp.target = this.rotation * 0.05;
-        });
+    update({ delta }) {
+        if (!this.mixer) {
+            return;
+        }
+        // The original divided first and then multiplied; keep the same rate.
+        this.mixer.update(delta * 0.0009);
     }
 
-    resize() {}
-
-    update() {
-        this.lerp.current = GSAP.utils.interpolate(
-            this.lerp.current,
-            this.lerp.target,
-            this.lerp.ease
-        );
-
-        this.actualRoom.rotation.y = this.lerp.current;
-
-        this.mixer.update(this.time.delta * 0.0009);
+    destroy() {
+        this.mixer?.stopAllAction();
+        for (const part of Object.values(this.parts)) {
+            part.traverse?.((object) => {
+                object.geometry?.dispose?.();
+                if (Array.isArray(object.material)) {
+                    object.material.forEach((m) => m.dispose?.());
+                } else {
+                    object.material?.dispose?.();
+                }
+            });
+        }
+        this.scene.remove(this.actualRoom);
     }
 }

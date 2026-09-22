@@ -1,31 +1,65 @@
 import * as THREE from "three";
-import Experience from "./Experience.js";
+import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 
+import { RENDER } from "./Config/scene.config.js";
+
+/**
+ * The WebGL renderer.
+ *
+ * Migrated to current three.js APIs. The r141 originals are all removed in
+ * modern three and would silently no-op or throw:
+ *   `renderer.outputEncoding = THREE.sRGBEncoding`  -> `renderer.outputColorSpace = THREE.SRGBColorSpace`
+ *   `texture.encoding = ...`                        -> `texture.colorSpace = ...`   (see Utils/Resources.js)
+ *   `renderer.physicallyCorrectLights = true`       -> removed; that is the default now,
+ *                                                      so the light intensities are unchanged.
+ *
+ * `RectAreaLightUniformsLib.init()` is new and REQUIRED: three no longer ships the
+ * LTC lookup tables in the core bundle, and without this the desk light in the
+ * diorama renders black.
+ */
 export default class Renderer {
-    constructor() {
-        this.experience = new Experience();
-        this.sizes = this.experience.sizes;
-        this.scene = this.experience.scene;
-        this.canvas = this.experience.canvas;
-        this.camera = this.experience.camera;
+    constructor({ canvas, scene, sizes, camera }) {
+        this.canvas = canvas;
+        this.scene = scene;
+        this.sizes = sizes;
+        this.camera = camera;
 
+        RectAreaLightUniformsLib.init();
         this.setRenderer();
+        this.bindContextLoss();
     }
 
     setRenderer() {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: true,
+            powerPreference: "high-performance",
         });
 
-        this.renderer.physicallyCorrectLights = true;
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.toneMapping = THREE.CineonToneMapping;
-        this.renderer.toneMappingExposure = 1.75;
+        this.renderer.toneMappingExposure = RENDER.toneMappingExposure;
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this.renderer.setSize(this.sizes.width, this.sizes.height);
-        this.renderer.setPixelRatio(this.sizes.pixelRatio);
+        // PCFShadowMap instead of PCFSoftShadowMap: soft shadows cost a lot for a
+        // diorama seen at 0.11 scale, where the difference is not visible.
+        this.renderer.shadowMap.type = THREE.PCFShadowMap;
+
+        this.resize();
+    }
+
+    /**
+     * A lost WebGL context (driver reset, GPU sleep, too many contexts) used to
+     * leave a frozen canvas with no way back. We surface it to the page instead.
+     */
+    bindContextLoss() {
+        this.canvas.addEventListener(
+            "webglcontextlost",
+            (event) => {
+                event.preventDefault();
+                document.documentElement.classList.add("webgl-context-lost");
+            },
+            false
+        );
     }
 
     resize() {
@@ -34,26 +68,10 @@ export default class Renderer {
     }
 
     update() {
-        // this.renderer.setViewport(0, 0, this.sizes.width, this.sizes.height);
         this.renderer.render(this.scene, this.camera.orthographicCamera);
-        // Second Screen
-        // this.renderer.setScissorTest(true);
-        // this.renderer.setViewport(
-        //     this.sizes.width - this.sizes.width / 3,
-        //     this.sizes.height - this.sizes.height / 3,
-        //     this.sizes.width / 3,
-        //     this.sizes.height / 3
-        // );
+    }
 
-        // this.renderer.setScissor(
-        //     this.sizes.width - this.sizes.width / 3,
-        //     this.sizes.height - this.sizes.height / 3,
-        //     this.sizes.width / 3,
-        //     this.sizes.height / 3
-        // );
-
-        // this.renderer.render(this.scene, this.camera.perspectiveCamera);
-
-        // this.renderer.setScissorTest(false);
+    destroy() {
+        this.renderer?.dispose();
     }
 }

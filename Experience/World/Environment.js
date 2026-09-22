@@ -1,91 +1,79 @@
 import * as THREE from "three";
-import Experience from "../Experience.js";
 import GSAP from "gsap";
-import GUI from "lil-gui";
 
+import { LIGHTING, RENDER } from "../Config/scene.config.js";
+import { EVENTS } from "../Utils/EVENTS.js";
+
+/**
+ * The light rig.
+ *
+ * Changed from the original:
+ *  - `lil-gui` is gone. The original imported it at module scope while every
+ *    call site was commented out, so an entire GUI library was parsed and
+ *    shipped to production for zero behaviour.
+ *  - shadow map size follows the device profile (1024 desktop / 512 mobile)
+ *    instead of a flat 2048x2048 — the diorama is seen at 0.11 scale.
+ *  - theme changes are subscribed to directly, instead of World relaying them.
+ */
 export default class Environment {
-    constructor() {
-        this.experience = new Experience();
-        this.scene = this.experience.scene;
-
-        // this.gui = new GUI({ container: document.querySelector(".hero-main") });
-        this.obj = {
-            colorObj: { r: 0, g: 0, b: 0 },
-            intensity: 3,
-        };
+    constructor({ scene, sizes, theme }) {
+        this.scene = scene;
+        this.sizes = sizes;
 
         this.setSunlight();
-        // this.setGUI();
-    }
 
-    setGUI() {
-        this.gui.addColor(this.obj, "colorObj").onChange(() => {
-            this.sunLight.color.copy(this.obj.colorObj);
-            this.ambientLight.color.copy(this.obj.colorObj);
-            console.log(this.obj.colorObj);
-        });
-        this.gui.add(this.obj, "intensity", 0, 10).onChange(() => {
-            this.sunLight.intensity = this.obj.intensity;
-            this.sunLight.ambientLight = this.obj.intensity;
-        });
+        this.offTheme = theme?.on(EVENTS.THEME_CHANGE, (next) =>
+            this.switchTheme(next)
+        );
     }
 
     setSunlight() {
-        this.sunLight = new THREE.DirectionalLight("#ffffff", 3);
+        const { sun, ambient } = LIGHTING;
+
+        this.sunLight = new THREE.DirectionalLight(sun.color, sun.intensity);
         this.sunLight.castShadow = true;
-        this.sunLight.shadow.camera.far = 20;
-        this.sunLight.shadow.mapSize.set(2048, 2048);
-        this.sunLight.shadow.normalBias = 0.05;
-        // const helper = new THREE.CameraHelper(this.sunLight.shadow.camera);
-        // this.scene.add(helper);
+        this.sunLight.shadow.camera.far = sun.shadowFar;
+        this.sunLight.shadow.mapSize.set(
+            RENDER.shadowMapSize[this.sizes.name],
+            RENDER.shadowMapSize[this.sizes.name]
+        );
+        this.sunLight.shadow.normalBias = sun.shadowNormalBias;
+        this.sunLight.position.set(sun.position.x, sun.position.y, sun.position.z);
 
-        this.sunLight.position.set(-1.5, 7, 3);
+        this.ambientLight = new THREE.AmbientLight(ambient.color, ambient.intensity);
+
         this.scene.add(this.sunLight);
-
-        this.ambientLight = new THREE.AmbientLight("#ffffff", 1);
         this.scene.add(this.ambientLight);
     }
 
+    /** @param {"light"|"dark"} theme */
     switchTheme(theme) {
-        // console.log(this.sunLight);
-        if (theme === "dark") {
-            GSAP.to(this.sunLight.color, {
-                r: 0.17254901960784313,
-                g: 0.23137254901960785,
-                b: 0.6862745098039216,
-            });
-            GSAP.to(this.ambientLight.color, {
-                r: 0.17254901960784313,
-                g: 0.23137254901960785,
-                b: 0.6862745098039216,
-            });
-            GSAP.to(this.sunLight, {
-                intensity: 0.78,
-            });
-            GSAP.to(this.ambientLight, {
-                intensity: 0.78,
-            });
-        } else {
-            GSAP.to(this.sunLight.color, {
-                r: 255 / 255,
-                g: 255 / 255,
-                b: 255 / 255,
-            });
-            GSAP.to(this.ambientLight.color, {
-                r: 255 / 255,
-                g: 255 / 255,
-                b: 255 / 255,
-            });
-            GSAP.to(this.sunLight, {
-                intensity: 3,
-            });
-            GSAP.to(this.ambientLight, {
-                intensity: 1,
-            });
-        }
+        const target = theme === "dark" ? LIGHTING.dark : LIGHTING.light;
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const duration = reduced ? 0 : 0.5;
+
+        GSAP.to(this.sunLight.color, { ...target.color, duration, overwrite: "auto" });
+        GSAP.to(this.ambientLight.color, {
+            ...target.color,
+            duration,
+            overwrite: "auto",
+        });
+        GSAP.to(this.sunLight, {
+            intensity: target.sunIntensity,
+            duration,
+            overwrite: "auto",
+        });
+        GSAP.to(this.ambientLight, {
+            intensity: target.ambientIntensity,
+            duration,
+            overwrite: "auto",
+        });
     }
 
-    resize() {}
-
-    update() {}
+    destroy() {
+        this.offTheme?.();
+        this.scene.remove(this.sunLight, this.ambientLight);
+        this.sunLight?.dispose();
+        this.ambientLight?.dispose();
+    }
 }

@@ -1,0 +1,301 @@
+/* ---------------------------------------------------------------- page --- */
+
+.page {
+    position: relative;
+    z-index: 10;
+}
+
+.page-inner {
+    position: relative;
+}
+
+/**
+ * Each story step is the runway over which the camera and the room travel.
+ * The original used a flat 3000px; a viewport-relative height keeps the pacing
+ * the same on a laptop and on a phone, and stops the page being absurdly long
+ * on a small screen.
+ */
+.story-step {
+    height: var(--story-step-height);
+    width: 100%;
+    /* Purely a scroll runway — nothing to read, nothing to click. */
+    pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- hero --- */
+
+.hero {
+    position: relative;
+    min-height: 100svh;
+}
+
+.hero-wrapper {
+    position: relative;
+    z-index: 2;
+    min-height: 100svh;
+    max-width: var(--shell-max);
+    margin-inline: auto;
+    padding: calc(var(--header-height) + var(--space-l)) var(--section-padding-inline)
+        var(--space-2xl);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(12vh, 1fr) auto;
+    grid-template-areas:
+        "status second"
+        "middle middle"
+        "main   main";
+    gap: var(--space-l);
+    align-items: start;
+}
+
+.hero-status {
+    grid-area: status;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    width: fit-content;
+    padding: 0.35em 0.85em 0.35em 0.6em;
+    border: var(--border-hairline);
+    border-radius: var(--radius-pill);
+    background-color: color-mix(in srgb, var(--paper-raised) 70%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.hero-status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--green);
+    flex: none;
+    /* Tier 3-ish: a status light communicates "live", so it keeps a slow pulse. */
+    animation: pulse 2.4s var(--ease-standard) infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.45;
+        transform: scale(0.8);
+    }
+}
+
+.hero-second {
+    grid-area: second;
+    text-align: right;
+    color: var(--ink-soft);
+}
+
+.hero-second-subheading {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    line-height: 1.7;
+}
+
+.hero-main {
+    grid-area: main;
+    align-self: end;
+    max-width: 48ch;
+}
+
+.hero-main-title {
+    font-size: var(--step-6);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+}
+
+.hero-main-description {
+    margin-top: var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 400;
+    line-height: var(--leading-snug);
+    color: var(--section-about);
+}
+
+.hero-lede {
+    margin-top: var(--space-m);
+    max-width: var(--measure);
+    color: var(--ink-soft);
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-l);
+}
+
+/* The intro card. Absolutely centred, as before. */
+.intro-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.arrow-svg-wrapper {
+    position: absolute;
+    left: 50%;
+    bottom: var(--space-2xl);
+    transform: translateX(-50%);
+    z-index: 3;
+    animation: bounce 1.2s var(--ease-standard) infinite alternate;
+}
+
+@keyframes bounce {
+    from {
+        transform: translate(-50%, 0);
+    }
+    to {
+        transform: translate(-50%, 8px);
+    }
+}
+
+/* Tier 1: the arrow's bounce is decorative travel, so it stops. The arrow
+   itself stays visible as an orientation cue. */
+@media (prefers-reduced-motion: reduce) {
+    .arrow-svg-wrapper {
+        animation: none;
+    }
+}
+
+/* ------------------------------------------------------------ section ---- */
+
+.section {
+    position: relative;
+    isolation: isolate;
+    width: min(100%, 62rem);
+    padding: var(--section-padding-block) var(--section-padding-inline);
+    background-color: var(--paper);
+    /*
+     * The rounded corner is now a static design property. The original tweened
+     * border-radius on every scroll frame — a layout property, animated
+     * continuously, to produce a decoration that encoded nothing.
+     */
+    border-top-right-radius: var(--radius-l);
+    border-bottom-right-radius: var(--radius-l);
+    border-right: var(--border-hairline);
+}
+
+/*
+ * Alternate sides: about and contact hug the left, work hugs the right. That
+ * asymmetry is what keeps a very long scroll from reading as one column.
+ */
+.section--work {
+    margin-left: auto;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+    border-left: var(--border-hairline);
+    border-top-left-radius: var(--radius-l);
+    border-bottom-left-radius: var(--radius-l);
+}
+
+.section-intro-wrapper {
+    position: relative;
+}
+
+.section-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.section-title {
+    margin-top: var(--space-xs);
+    font-size: var(--step-5);
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+}
+
+.section-title-text {
+    display: inline-block;
+    padding-bottom: 0.06em;
+    /*
+     * The colour IS the section marker: the same three colours as the three
+     * floor circles in the 3D scene, in the same order.
+     */
+    box-shadow: inset 0 -0.14em 0 var(--section-color, var(--section-about));
+}
+
+.section--about {
+    --section-color: var(--section-about);
+}
+
+.section--work {
+    --section-color: var(--section-work);
+}
+
+.section--contact {
+    --section-color: var(--section-contact);
+}
+
+.section-sub {
+    margin-top: var(--space-m);
+    max-width: var(--measure);
+    color: var(--ink-soft);
+}
+
+.section-detail-wrapper {
+    margin-top: var(--space-2xl);
+}
+
+/* --------------------------------------------------------- progress bar -- */
+
+.progress-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    z-index: 4;
+}
+
+.section--work .progress-wrapper {
+    left: auto;
+    right: 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100vh;
+    transform-origin: top center;
+    background-color: var(--section-color, var(--section-about));
+}
+
+@media (max-width: 768px) {
+    .section,
+    .section--work {
+        width: 100%;
+        margin-inline: 0;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: var(--border-hairline);
+    }
+
+    .progress-wrapper {
+        width: 2px;
+    }
+}
